@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HabitTracker X</title><link rel="manifest" href="./manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07061a;--bg2:#0f0d2b;--card:rgba(30,24,70,.55);--bd:rgba(168,120,255,.25);--tx:#f1eeff;--mu:#9d95c9;--p:#8b5cf6;--pk:#ec4899;--or:#fb923c;--gd:#fbbf24;--ok:#22c55e;--er:#ef4444;--in:#16133a;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f1ff;--bg2:#fff;--card:rgba(255,255,255,.85);--bd:rgba(124,58,237,.22);--tx:#1d1640;--mu:#6b6394;--in:#fff;color-scheme:light}
+*{box-sizing:border-box}html,body{margin:0;max-width:100%;overflow-x:hidden}
+body{font-family:Sora,system-ui,sans-serif;background:radial-gradient(900px 500px at 80% -10%,rgba(139,92,246,.35),transparent),radial-gradient(700px 400px at 0 100%,rgba(236,72,153,.2),transparent),var(--bg);color:var(--tx);min-height:100vh}
+h1,h2,h3{margin:0}button,input,select{font:inherit;color:var(--tx)}
+input,select{background:var(--in);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;width:100%;margin:5px 0}
+input[type=time]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:1;filter:invert(.6) sepia(1) saturate(5) hue-rotate(230deg)}
+input:focus,button:focus-visible{outline:2px solid var(--pk);outline-offset:1px}
+.btn{background:linear-gradient(90deg,var(--p),var(--pk));border:0;border-radius:10px;padding:10px 16px;color:#fff;font-weight:600;cursor:pointer}
+.btn.alt{background:transparent;border:1px solid var(--bd);color:var(--tx)}.btn.dg{background:var(--er)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;backdrop-filter:blur(12px)}
+.mu{color:var(--mu);font-size:.85rem}.err{color:var(--er);min-height:1.2em;font-size:.85rem}.okm{color:var(--ok)}
+#auth{max-width:420px;margin:8vh auto;padding:16px}#auth .card{display:grid;gap:6px}
+.logo{font-weight:800;font-size:1.6rem;background:linear-gradient(90deg,var(--p),var(--pk),var(--or));-webkit-background-clip:text;background-clip:text;color:transparent}
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+nav{padding:20px 14px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;gap:6px}
+nav button{text-align:left;background:none;border:0;border-radius:10px;padding:11px 12px;cursor:pointer;color:var(--mu)}
+nav button.on{background:linear-gradient(90deg,rgba(139,92,246,.35),rgba(236,72,153,.2));color:var(--tx)}
+main{padding:20px;min-width:0}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--or));display:grid;place-items:center;font-weight:800;color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
+.big{font-size:1.9rem;font-weight:800}.bar{height:10px;background:var(--in);border-radius:9px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--p),var(--pk),var(--or));transition:width .4s}
+.hab{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--bd);border-radius:10px;margin:5px 0;flex-wrap:wrap}.hab .btn{padding:4px 10px;font-size:.8rem}.hab.d{opacity:.6}.hab.d b{text-decoration:line-through}
+.hab input[type=checkbox]{width:16px;height:16px;accent-color:var(--p);margin:0;flex:none}.hab>div{flex:1;min-width:0}
+.chart{display:flex;gap:8px;align-items:flex-end;height:130px}.chart div{flex:1;text-align:center;font-size:.7rem}.chart i{display:block;background:linear-gradient(var(--pk),var(--p));border-radius:6px 6px 0 0;min-height:3px}
+.bdg{text-align:center;padding:14px}.bdg.off{filter:grayscale(1);opacity:.45}.bdg span{font-size:2rem}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px;z-index:9}.modal .card{background:var(--bg2);width:min(420px,100%)}
+.hide{display:none!important}#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;padding:10px 18px;border-radius:12px;z-index:20}
+@media(max-width:760px){#app{grid-template-columns:1fr}nav{flex-direction:row;overflow-x:auto;position:sticky;top:0;z-index:5;border-right:0;border-bottom:1px solid var(--bd)}nav .logo{display:none}nav button{white-space:nowrap}}
+@keyframes pop{0%{transform:translateX(-50%) scale(.6);opacity:0}60%{transform:translateX(-50%) scale(1.1)}100%{transform:translateX(-50%) scale(1);opacity:1}}#toast{animation:pop .35s}.flash{animation:fl .9s}@keyframes fl{0%{box-shadow:0 0 0 0 var(--gd)}100%{box-shadow:0 0 0 22px transparent}}
+.cd{margin-left:auto;font-variant-numeric:tabular-nums;font-size:.78rem;padding:2px 9px;border-radius:20px;background:var(--in);border:1px solid var(--bd)}.cd.live{color:var(--ok);border-color:var(--ok)}.cd.wait{color:var(--or);border-color:var(--or)}.cd.over{color:var(--er);border-color:var(--er)}.cdn{font-variant-numeric:tabular-nums}.cdn.live{color:var(--ok)}.cdn.wait{color:var(--or)}.cdn.over{color:var(--er)}
+.cf{position:fixed;top:-30px;z-index:30;pointer-events:none;animation:fall 2.2s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+#alb{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:40;background:var(--er);color:#fff;padding:10px 14px;border-radius:14px;display:flex;gap:12px;align-items:center;font-weight:600;box-shadow:0 0 30px var(--er);animation:shk .5s infinite}#alb .btn{background:#fff;color:#b91c1c}@keyframes shk{0%,100%{transform:translateX(-50%) rotate(0)}25%{transform:translateX(-50%) rotate(-1.5deg)}75%{transform:translateX(-50%) rotate(1.5deg)}}
+.dd{position:relative}.ddl{position:absolute;z-index:8;left:0;right:0;top:100%;max-height:260px;overflow:auto;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:4px;box-shadow:0 12px 30px rgba(0,0,0,.4)}.ddi{display:flex;align-items:center;border-radius:8px}.ddi:hover{background:var(--in)}.ddi .pk{flex:1;text-align:left;background:none;border:0;padding:9px 10px;cursor:pointer;color:var(--tx)}.ddi .pk.on{font-weight:800;color:var(--pk)}.ddi .dx{background:none;border:0;color:var(--er);font-size:1.2rem;padding:4px 14px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}#alb{animation:none}}
+</style></head><body>
+
+<section id="auth" class="hide"><div class="card">
+<div class="logo">HabitTracker X</div><div class="mu">Build routines. Earn XP. Level up. · by MUTTAKIN</div>
+<div id="fReg" class="hide"><input id="rn" placeholder="Full name" autocomplete="name"><input id="re" type="email" placeholder="Email" autocomplete="email"><input id="rp" type="password" placeholder="Password (min 8)" autocomplete="new-password"><input id="rc" type="password" placeholder="Confirm password" autocomplete="new-password"><button class="btn" id="bReg">Create account</button><button class="btn alt" data-sw="L">I already have an account</button></div>
+<div id="fLog"><input id="le" type="text" placeholder="Email or username" autocomplete="username"><input id="lp" type="password" placeholder="Password" autocomplete="current-password"><button class="btn" id="bLog">Log in</button><div class="mu">Accounts live only in this browser. There is no password reset, so keep your password safe.</div><button class="btn alt" data-sw="R">Create account</button></div>
+<div id="aMsg" class="err" role="alert"></div></div></section>
+
+<div id="app" class="hide">
+<nav><div class="logo" style="margin:4px 8px 12px">HabitTracker X</div>
+<button data-v="dash" class="on">Dashboard</button><button data-v="routine">Routine</button><button data-v="rewards">Rewards</button><button data-v="badges">Badges</button><button data-v="stats">Analytics</button><button data-v="calendar">Calendar</button><button data-v="goals">Goals</button><button data-v="planner">Study planner</button><button data-v="games">Game Center</button><button data-v="tutor">AI Tutor</button><button data-v="prof">Profile</button></nav>
+<main><header><div><h2 id="hi"></h2><div class="mu" id="dt"></div></div><div class="row"><button class="btn alt" id="bSn" aria-label="Toggle sound">🔔</button><button class="btn alt" id="bTh">Light mode</button><div class="av" id="av"></div></div></header>
+<div id="v"></div><footer class="mu" style="text-align:center;margin:28px 0 8px"><b class="logo" style="font-size:1.05rem">HabitTracker X</b><br>Made By MUTTAKIN</footer></main></div>
+
+<div id="mod" class="modal hide"><div class="card" id="modB"></div></div><div id="toast" class="hide"></div><div id="alb" class="hide" role="alert"><span id="alt"></span><button class="btn" id="als">Stop alarm</button></div>
+
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=(o=0)=>{const d=new Date();d.setDate(d.getDate()-o);return d.toLocaleDateString('en-CA')};
+const REWARDS=[{id:'snack',n:'Favorite snack',c:40,i:'🍫'},{id:'game',n:'1 hour of gaming',c:60,i:'🎮'},{id:'movie',n:'Movie night',c:100,i:'🍿'},{id:'day',n:'Free day off',c:250,i:'🏖️'}];
+let user,S,view='dash';
+const enc=new TextEncoder(),b64=a=>btoa(String.fromCharCode(...new Uint8Array(a))),unb=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+const hash=async(p,salt)=>b64(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:210000,hash:'SHA-256'},await crypto.subtle.importKey('raw',enc.encode(p),'PBKDF2',false,['deriveBits']),256));
+const U=()=>{try{return JSON.parse(localStorage.getItem('htx_users')||'{}')}catch(x){return {}}},setU=u=>localStorage.setItem('htx_users',JSON.stringify(u));
+const chk=async(e,p)=>{const a=U()[e];return !!a&&await hash(p,unb(a.salt))===a.hash};
+const fresh=e=>({name:U()[e].name,username:e.split('@')[0],theme:'dark',xp:0,points:0,earned:0,tasks:[],log:{},redeemed:[]});
+function start(e){user={email:e};let raw=localStorage.getItem('htx_d_'+e);try{S=raw?JSON.parse(raw):fresh(e)}catch(x){S=fresh(e)}
+norm();localStorage.setItem('htx_s',e);setTheme(S.theme||'dark');
+$('#auth').classList.add('hide');$('#app').classList.remove('hide');if(!raw)save();sweep();badgeCheck();render()}
+function save(){try{localStorage.setItem('htx_d_'+user.email,JSON.stringify(S))}catch(x){toast('Save failed. Browser storage is full or blocked.')}}
+function out(){localStorage.removeItem('htx_s');user=null;$('#app').classList.add('hide');$('#auth').classList.remove('hide');aerr('')}
+function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hide'),ms||2400)}
+function setTheme(t){document.documentElement.dataset.theme=t;$('#bTh').textContent=t==='dark'?'Light mode':'Dark mode';if(S)document.documentElement.style.setProperty('--p',ACC[S.ac]||'#8b5cf6')}
+$('#bTh').onclick=()=>{S.theme=S.theme==='dark'?'light':'dark';setTheme(S.theme);save()};
+$('#bSn').onclick=()=>{S.sound=!S.sound;$('#bSn').textContent=S.sound?'🔔':'🔕';save();if(S.sound)alarm('🔔 Sound is on',1)};
+const aerr=m=>$('#aMsg').textContent=m;
+document.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{aerr('');$('#fReg').classList.toggle('hide',b.dataset.sw!=='R');$('#fLog').classList.toggle('hide',b.dataset.sw==='R')});
+$('#bReg').onclick=async()=>{const n=$('#rn').value.trim(),e=$('#re').value.trim().toLowerCase(),p=$('#rp').value;
+if(!n)return aerr('Enter your name.');if(!/^\S+@\S+\.\S+$/.test(e))return aerr('Enter a valid email.');if(p.length<8)return aerr('Password needs at least 8 characters.');if(p!==$('#rc').value)return aerr('Passwords do not match.');
+if(!window.crypto||!crypto.subtle)return aerr('This browser blocks secure hashing. Open the site over https.');
+const u=U();if(u[e])return aerr('An account with this email already exists here.');const salt=crypto.getRandomValues(new Uint8Array(16));u[e]={name:n,salt:b64(salt),hash:await hash(p,salt)};setU(u);start(e)};
+$('#bLog').onclick=async()=>{const e=$('#le').value.trim().toLowerCase();try{if(!await chk(e,$('#lp').value))return aerr('Wrong email or password.');start(e)}catch(x){aerr('Could not log in on this browser.')}};
+document.querySelectorAll('nav [data-v]').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('nav [data-v]').forEach(x=>x.classList.toggle('on',x===b));render()});
+
+const catsAll=()=>[...new Set(CATS.filter(c=>!(S.hid||[]).includes(c)).concat(S.cats||[]))];
+const DAYN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],CATS=['Mathematics','Physics','English','Bangla','Basic Electricity','College Study','Python Programming','Coding Practice','Skill Development','Exercise','Personal Tasks'];
+const BASE={easy:6,medium:12,hard:20},COSTS=[20,40,60,100,150,250],RC=['Entertainment','Food','Gift','Outing','Milestone'],LEARN=['Mathematics','Physics','Programming','Python Programming','New skills','Skill Development','Coding Practice'],AVS=['🦊','🐼','🚀','🎮','🧠','🐉'];
+const DEF_RW=()=>[{id:'r1',n:'Favorite snack',d:'A treat you love',cat:'Food',c:40},{id:'r2',n:'30 minutes of entertainment',d:'Guilt-free break',cat:'Entertainment',c:60},{id:'r3',n:'Movie night',d:'Pick any movie',cat:'Entertainment',c:100}];
+function norm(){S.tasks=Array.isArray(S.tasks)?S.tasks:[];S.log=S.log&&typeof S.log==='object'?S.log:{};S.rewards=Array.isArray(S.rewards)?S.rewards:DEF_RW();S.redeemed=Array.isArray(S.redeemed)?S.redeemed:[];S.badges=S.badges&&typeof S.badges==='object'?S.badges:{};
+['xp','points','earned'].forEach(k=>S[k]=Math.max(0,+S[k]||0));S.checked=S.checked||today();S.made=S.made||today();S.name=S.name||'Player';S.username=S.username||'player';S.cats=Array.isArray(S.cats)?S.cats.filter(c=>typeof c==='string').slice(0,30):[];S.sound=S.sound!==false;S.hid=Array.isArray(S.hid)?S.hid:[];S.wins=+S.wins||0;S.chests=+S.chests||0;S.wg=[100,200,300,400,500].includes(S.wg)?S.wg:200}
+const nx=d=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+1);return x.toLocaleDateString('en-CA')},dow=d=>new Date(d+'T12:00').getDay();
+const G=d=>S.log[d]||{done:{},missed:{}},L=d=>(S.log[d]=S.log[d]||{done:{},missed:{}});
+const mins=t=>{if(!t.start||!t.end)return 30;const a=t.start.split(':'),b=t.end.split(':'),m=(+b[0]*60+ +b[1])-(+a[0]*60+ +a[1]);return m>0?m:30};
+const pts=t=>Math.min(30,BASE[t.diff]+Math.min(6,Math.floor(mins(t)/30)*2)+(t.pri==='high'?3:0)+(t.diff==='hard'&&LEARN.includes(t.cat)?3:0));
+const sched=d=>S.tasks.filter(t=>t.days.includes(dow(d))&&t.created<=d),dayPts=d=>Object.values(G(d).done).reduce((a,x)=>a+x.p,0);
+const need=l=>l<=3?250:250+(l-3)*50;
+function lv(){let l=1,x=S.xp;while(x>=need(l)){x-=need(l);l++}return{l,x,n:need(l)}}
+function active(d){const g=G(d);return Object.keys(g.done).length>0||g.rest}
+function streak(){let n=0,o=active(today())?0:1;while(active(today(o+n))&&n<400)n++;return n}
+const allDone=()=>Object.values(S.log).flatMap(l=>Object.values(l.done)),cnt=f=>allDone().filter(f).length;
+const BADGES=[{id:'b1',i:'🗡️',n:'First Quest',t:'Complete your first task',ok:()=>cnt(()=>1)>=1},{id:'b2',i:'🔥',n:'3-Day Streak',t:'Stay active 3 days in a row',ok:()=>streak()>=3},{id:'b3',i:'⚔️',n:'7-Day Warrior',t:'7-day streak',ok:()=>streak()>=7},{id:'b4',i:'🛡️',n:'30-Day Consistency',t:'30-day streak',ok:()=>streak()>=30},
+{id:'b5',i:'📐',n:'Mathematics Master',t:'Complete 20 Mathematics tasks',ok:()=>cnt(x=>x.cat==='Mathematics')>=20},{id:'b6',i:'💻',n:'Coding Explorer',t:'Complete 15 Programming or Coding tasks',ok:()=>cnt(x=>['Programming','Python Programming','Coding Practice'].includes(x.cat))>=15},{id:'b7',i:'🤖',n:'Skill Seeker',t:'Complete 10 New skills or Skill Development tasks',ok:()=>cnt(x=>x.cat==='New skills'||x.cat==='Skill Development')>=10},
+{id:'b8',i:'👑',n:'Hard Mode Champion',t:'Complete 10 hard tasks',ok:()=>cnt(x=>x.diff==='hard')>=10},{id:'b9',i:'💎',n:'500 Points Earned',t:'Earn 500 points in total',ok:()=>S.earned>=500},{id:'b10',i:'🌟',n:'Level 10 Player',t:'Reach level 10',ok:()=>lv().l>=10},{id:'b12',i:'🎁',n:'Treasure Hunter',t:'Open 3 daily chests',ok:()=>S.chests>=3},{id:'b13',i:'🏆',n:'Weekly Champion',t:'Reach a weekly goal',ok:()=>S.wins>=1}];
+function badgeCheck(){BADGES.forEach(b=>{if(!S.badges[b.id]&&b.ok()){S.badges[b.id]=today();toast('🏅 Badge unlocked: '+b.n,3500);confetti()}})}
+function sweep(){const t0=today();let d=S.checked<today(30)?today(30):S.checked;for(;d<t0;d=nx(d)){const g=G(d);if(g.rest)continue;sched(d).forEach(t=>{if(g.done[t.id]||g.missed[t.id])return;const p=Math.min(Math.max(1,Math.round(BASE[t.diff]/4)),S.points);S.points-=p;L(d).missed[t.id]={p,n:t.name,cat:t.cat}})}S.checked=t0;save()}
+function complete(id){const d=today(),t=S.tasks.find(x=>x.id===id),l=L(d);if(!t||l.done[id]||l.rest||!t.days.includes(dow(d)))return;
+const p=Math.min(pts(t),Math.max(0,100-dayPts(d))),b=lv().l;l.done[id]={p,n:t.name,cat:t.cat,diff:t.diff,m:mins(t)};S.xp+=p;S.points+=p;S.earned+=p;
+if(!p)toast('Daily cap of 100 points reached. Task logged without points.',3000);else toast('+'+p+' points');const q=qd(d);if(!l.q&&q.f(l)>=q.t){l.q=1;S.points+=q.b;S.xp+=q.b;S.earned+=q.b;toast('🎯 Daily quest done! +'+q.b+' bonus points',4000);confetti()}if(S.wclaim!==wk()&&weekPts()>=S.wg){S.wclaim=wk();S.wins++;const w2=S.wg/10;S.points+=w2;S.xp+=w2;S.earned+=w2;toast('🏆 Weekly goal reached! +'+w2,4000);confetti()}badgeCheck();if(lv().l>b){toast('🎉 Level up! Level '+lv().l+' · '+title(lv().l),4000);confetti()}save();render()}
+function restDay(){const d=today(),g=L(d);if(g.rest){g.rest=false;save();return render()}let n=0;for(let o=1;o<7;o++)if(G(today(o)).rest)n++;if(n>=1)return toast('You can take one rest day per week.');g.rest=true;save();render();toast('Rest day on. No penalties today.')}
+function taskRow(t,d,btns){const g=G(d),dn=g.done[t.id],mis=g.missed[t.id],cdx=d===today()&&!dn&&!g.rest?((t.start||t.end)?`<span class="cd" data-cid="${t.id}"></span>`:'')+`<button class="btn alt" data-f="${t.id}">Focus</button>`:'';return `<div class="hab ${dn?'d':''}"><input type="checkbox" aria-label="Complete ${esc(t.name)}" data-t="${t.id}" ${dn?'checked':''} ${dn||g.rest||d!==today()?'disabled':''}><div><b>${esc(t.name)}</b><div class="mu">${esc(t.cat)} · ${t.start||'Anytime'}${t.end?'–'+t.end:''} · ${t.diff} · ${t.pri==='high'?'high priority · ':''}+${pts(t)} pts${mis?' · missed':''}</div></div>${cdx}${btns||''}</div>`}
+const hms=s=>{s=Math.max(0,Math.floor(s));return[s/3600|0,(s%3600)/60|0,s%60].map(x=>String(x).padStart(2,'0')).join(':')},tm2=hm=>{const a=hm.split(':'),x=new Date();x.setHours(+a[0],+a[1],0,0);return x};
+function cdText(t){const n=new Date();if(t.start&&n<tm2(t.start))return['Starts in '+hms((tm2(t.start)-n)/1e3),'wait'];if(t.end&&n<tm2(t.end))return['Ends in '+hms((tm2(t.end)-n)/1e3),'live'];if(t.end)return['Time over','over'];if(t.start)return['Started','live'];return['','']}
+let F=null;
+function qtCard(){const q=QT,sh=q.total?q.left:q.h*3600+q.m*60+q.s;return `<div class="card" style="margin-bottom:14px"><div class="mu">⏲️ Timer</div><div class="big" id="qd">${hms(sh)}</div><div class="bar"><i id="qb" style="width:${q.total?100-q.left/q.total*100:0}%"></i></div><div class="row" style="margin-top:8px"><label class="mu">Hours<input id="qh" type="number" min="0" max="99" value="${q.h}" style="width:80px"></label><label class="mu">Minutes<input id="qm" type="number" min="0" max="59" value="${q.m}" style="width:80px"></label><label class="mu">Seconds<input id="qs" type="number" min="0" max="59" value="${q.s}" style="width:80px"></label></div><div class="row" style="margin-top:8px">${[[300,'5 min'],[900,'15 min'],[1500,'25 min'],[2700,'45 min'],[3600,'1 hour']].map(x=>`<button class="btn alt" data-qp="${x[0]}">${x[1]}</button>`).join('')}</div><div class="row" style="margin-top:10px"><button class="btn" id="qgo">${q.run?'Pause':q.total&&q.left>0?'Resume':'Start'}</button><button class="btn alt" id="qrs">Reset</button></div></div>`}
+function focusCard(){if(!F)return'';return `<div class="card" id="fc" style="margin-bottom:14px"><div class="mu">Focus session</div><b>${esc(F.name)}</b><div class="big" id="ft">${hms(F.left)}</div><div class="bar"><i id="fb" style="width:${100-F.left/F.total*100}%"></i></div><div class="row" style="margin-top:10px"><button class="btn" id="fp">${F.run?'Pause':F.left?'Resume':'Finished'}</button><button class="btn alt" id="fr">Reset</button>${F.brk?'':'<button class="btn alt" id="fd">Mark task done</button>'}${!F.left&&!F.brk?'<button class="btn alt" id="fbk">☕ 5 min break</button>':''}<button class="btn alt" id="fx">Close</button></div></div>`}
+function nextCard(tt,g){const n=new Date(),t=tt.find(x=>!g.done[x.id]&&(x.end?n<tm2(x.end):x.start&&n<tm2(x.start)));if(!t||g.rest)return'';return `<div class="card" id="nxc" style="margin-bottom:14px"><div class="mu">Next up</div><b>${esc(t.name)}</b><div class="big cdn" data-cid="${t.id}"></div></div>`}
+let AC;const ac=()=>{try{AC=AC||new AudioContext();if(AC.state==='suspended')AC.resume();return AC}catch(x){}};document.addEventListener('click',ac);document.addEventListener('click',e=>{const l=$('#ddl');if(l&&!e.target.closest('#dd')){l.classList.add('hide');const b=$('#ddb');if(b)b.setAttribute('aria-expanded','false')}});
+let AL=null,ALT;
+function stopAlarm(){if(AL){try{AL.disconnect()}catch(x){}AL=null}clearTimeout(ALT);$('#alb').classList.add('hide');if(navigator.vibrate)navigator.vibrate(0)}
+function alarm(msg,test){if(!S||(S.sound===false&&!test))return;if(msg){$('#alt').textContent=msg;$('#alb').classList.remove('hide')}
+if(navigator.vibrate)navigator.vibrate([400,150,400,150,400,150,400]);const a=ac();if(!a)return;if(AL){try{AL.disconnect()}catch(x){}}
+const out=a.createGain(),cm=a.createDynamicsCompressor();out.gain.value={Low:.35,Medium:.65,High:.9,Max:1}[S.vol||'Max'];out.connect(cm);cm.connect(a.destination);AL=out;
+const t0=a.currentTime+.05,k=S.snd||'Alarm',tone=(f,t,d,ty)=>{const o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(1,t+.015);g.gain.setValueAtTime(1,t+d*.7);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.02)};
+if(k==='Siren'){const o=a.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(600,t0);for(let i=0;i<5;i++){o.frequency.linearRampToValueAtTime(1300,t0+i*1.2+.6);o.frequency.linearRampToValueAtTime(600,t0+i*1.2+1.2)}o.connect(out);o.start(t0);o.stop(t0+6)}
+else if(k==='Bell')for(let i=0;i<5;i++)[1319,1568,2093].forEach((f,j)=>tone(f,t0+i*1.1+j*.1,1,'sine'));
+else if(k==='Digital')for(let b=0;b<5;b++)for(let j=0;j<4;j++)tone(1600,t0+b*1.1+j*.16,.1,'square');
+else for(let i=0;i<18;i++)tone(i%2?1100:820,t0+i*.33,.28,'square');
+clearTimeout(ALT);ALT=setTimeout(stopAlarm,msg?9000:7000)}
+$('#als').onclick=stopAlarm;
+const ENDED={};
+function tick(){if(!user||!S)return;const now=Date.now();
+if(F&&F.run){F.left=Math.max(0,F.left-(now-F.last)/1000);F.last=now;if(!F.left){F.run=false;alarm('⏱️ Focus finished: '+F.name);if($('#fp'))$('#fp').textContent='Finished'}}
+if(F&&$('#ft')){$('#ft').textContent=hms(F.left);$('#fb').style.width=(100-F.left/F.total*100)+'%'}
+if(QT.run){QT.left=Math.max(0,QT.left-(now-QT.last)/1000);QT.last=now;if(!QT.left){QT.run=false;alarm('⏲️ Timer finished!');if(view==='dash')render()}}
+if($('#qd')&&QT.total){$('#qd').textContent=hms(QT.left);$('#qb').style.width=(100-QT.left/QT.total*100)+'%'}
+document.title=(QT.run?hms(QT.left)+' · ':F&&F.run?hms(F.left)+' · ':'')+'HabitTracker X';
+const d0=today(),g0=G(d0);if(!g0.rest)sched(d0).forEach(t=>{if(!t.end||g0.done[t.id])return;const k=d0+t.id,df=now-tm2(t.end).getTime();if(df>=0&&df<3e5&&!ENDED[k]){ENDED[k]=1;alarm('⏰ Time over: '+t.name);try{if(Notification.permission==='granted')new Notification('Time over',{body:t.name})}catch(x){}}});
+document.querySelectorAll('[data-cid]').forEach(e=>{const t=S.tasks.find(x=>x.id===e.dataset.cid);if(!t)return;const r=cdText(t);e.textContent=r[0];e.className=(e.classList.contains('cdn')?'big cdn ':'cd ')+r[1]})}
+setInterval(tick,1000);
+const QUESTS=[{n:'Finish 3 tasks',t:3,b:8,f:g=>Object.keys(g.done).length},{n:'Earn 40 points today',t:40,b:8,f:g=>Object.values(g.done).reduce((a,x)=>a+x.p,0)},{n:'Complete 1 hard task',t:1,b:10,f:g=>Object.values(g.done).filter(x=>x.diff==='hard').length},{n:'Focus for 60 minutes',t:60,b:10,f:g=>Object.values(g.done).reduce((a,x)=>a+x.m,0)},{n:'Study 2 different subjects',t:2,b:8,f:g=>new Set(Object.values(g.done).map(x=>x.cat)).size}];
+const dh=d=>[...d].reduce((a,c)=>a+c.charCodeAt(0),0),qd=d=>QUESTS[dh(d)%QUESTS.length];
+const QUOTES=['Small steps every day beat big plans someday.','Start now. Perfect can wait.','One task done is one promise kept.','Consistency builds what motivation starts.','Rest is part of the plan, not a break from it.','Your future self is watching. Make them proud.','Progress is quiet. Keep going.','Focus for twenty minutes, then see how you feel.','A tidy plan makes a calm mind.','Today counts. Make it count.'];
+const TITLES=['Rookie','Explorer','Challenger','Warrior','Champion','Master','Legend'],title=l=>TITLES[Math.min(TITLES.length-1,Math.floor((l-1)/2))];
+const ACC={Violet:'#8b5cf6',Pink:'#ec4899',Orange:'#fb923c',Green:'#22c55e',Blue:'#3b82f6'};
+function confetti(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;for(let i=0;i<28;i++){const e=document.createElement('span');e.className='cf';e.textContent=['🎉','✨','⭐','🔥','💜'][i%5];e.style.cssText=`left:${Math.random()*100}vw;animation-delay:${Math.random()*.4}s;font-size:${14+Math.random()*16}px`;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}}
+const wk=()=>{const x=new Date();x.setDate(x.getDate()-x.getDay());return x.toLocaleDateString('en-CA')};
+const weekPts=()=>{let s=0,d=wk();for(let i=0;i<7;i++,d=nx(d))s+=dayPts(d);return s};
+function extras(g,tt,dn){const wp=weekPts(),ch=tt.length>=2&&dn===tt.length&&!g.rest;
+return `<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><div><div class="mu">🏆 Weekly goal · +${S.wg/10} bonus</div><b>${Math.min(wp,S.wg)}/${S.wg} points this week</b></div><select id="wg" aria-label="Weekly goal" style="width:auto">${[100,200,300,400,500].map(x=>`<option ${x===S.wg?'selected':''}>${x}</option>`).join('')}</select></div><div class="bar"><i style="width:${Math.min(100,wp/S.wg*100)}%"></i></div>${S.wclaim===wk()?'<div class="okm mu">Goal reached this week ✓</div>':''}</div>
+${ch?(g.chest?`<div class="card okm" style="margin-bottom:14px">🎁 Daily chest opened: +${g.chest} bonus points</div>`:`<div class="card row" style="margin-bottom:14px;justify-content:space-between"><b>All tasks done! A chest is waiting.</b><button class="btn" id="chest">🎁 Open daily chest</button></div>`):''}`}
+let curCat,draft=null,ddOpen=false,QT={h:0,m:5,s:0,total:0,left:0,run:false,last:0};
+let ed=null,dsel=new Date().getDay();
+function render(){
+$('#hi').textContent='Welcome back, '+S.name;$('#bSn').textContent=S.sound?'🔔':'🔕';$('#av').textContent=S.avatar||(S.name[0]||'?').toUpperCase();
+$('#dt').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+const v=$('#v'),d=today(),tt=sched(d).sort((a,b)=>(a.start||'').localeCompare(b.start||'')),g=G(d),dn=tt.filter(t=>g.done[t.id]).length,pc=tt.length?Math.round(dn/tt.length*100):0,l=lv(),dp=dayPts(d);
+const miss7=[1,2,3,4,5,6,7].reduce((a,o)=>a+Object.keys(G(today(o)).missed).length,0);
+if(view==='dash'){const up=[1,2,3].flatMap(o=>sched(today(-o)).map(t=>({t,o})));
+v.innerHTML=`<p class="mu" style="margin:0 0 12px">💬 ${QUOTES[(dh(d)+3)%QUOTES.length]}</p>${(()=>{const q=qd(d),c=Math.min(q.t,q.f(g));return `<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><div><div class="mu">🎯 Daily quest · +${q.b} bonus points</div><b>${q.n}</b></div><div class="mu">${g.q?'Completed ✓':c+'/'+q.t}</div></div><div class="bar"><i style="width:${g.q?100:c/q.t*100}%"></i></div></div>`})()}${extras(g,tt,dn)}${qtCard()}${focusCard()}${nextCard(tt,g)}<div class="grid"><div class="card"><div class="mu">Level ${l.l} · ${title(l.l)}</div><div class="big">${l.x}<span class="mu">/${l.n} XP</span></div><div class="bar"><i style="width:${l.x/l.n*100}%"></i></div></div>
+<div class="card row"><svg width="78" height="78" viewBox="0 0 36 36" role="img" aria-label="${pc}% complete"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--in)" stroke-width="3.5"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--pk)" stroke-width="3.5" stroke-linecap="round" pathLength="100" stroke-dasharray="${pc} 100" transform="rotate(-90 18 18)"/></svg><div><div class="big">${pc}%</div><div class="mu">${dn} done · ${tt.length-dn} left of ${tt.length}</div></div></div>
+<div class="card"><div class="mu">Points today (cap 100)</div><div class="big" style="color:var(--gd)">${dp}/100</div><div class="bar"><i style="width:${dp}%"></i></div></div>
+<div class="card"><div class="mu">Focus time today</div><div class="big">${Object.values(g.done).reduce((a,x)=>a+x.m,0)} min</div></div><div class="card"><div class="mu">Streak</div><div class="big">🔥 ${streak()}</div><div class="mu">Missed in 7 days: <b style="color:var(--er)">${miss7}</b> · Wallet: ${S.points}</div></div></div>
+<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Today's schedule</h3><button class="btn alt" id="rest">${g.rest?'Cancel rest day':'Take a rest day'}</button></div>${g.rest?'<p class="okm">Rest day: no penalties and your streak is safe.</p>':''}${tt.map(t=>taskRow(t,d)).join('')||'<p class="mu">Nothing scheduled today. Open Routine to add tasks.</p>'}
+<p class="mu">${tt.length?(pc===100?'All tasks done. Great consistency!':dn?'Good progress. '+(tt.length-dn)+' to go.':'Start with one task to earn your first points.'):''}</p></div>
+<div class="card"><h3>Upcoming</h3>${up.map(x=>`<div class="mu">${DAYN[dow(today(-x.o))]} · ${esc(x.t.name)} · ${x.t.start||'Anytime'}</div>`).join('')||'<p class="mu">No upcoming tasks in the next 3 days.</p>'}</div>`;
+v.querySelector('#rest').onclick=restDay}
+else if(view==='routine'){const e=ed||draft||{name:'',cat:catsAll()[0]||'General',start:'',end:'',diff:'medium',pri:'normal',desc:'',days:[1,2,3,4,5],rem:false};draft=null;curCat=e.cat||catsAll()[0]||'__c';const dop=ddOpen;ddOpen=false;
+const op=(a,s)=>a.map(x=>`<option ${x===s?'selected':''}>${x}</option>`).join('');
+v.innerHTML=`<div class="card" style="margin-bottom:14px"><h3>${ed?'Edit task':'Add a task'}</h3><input id="tn" placeholder="Task name" maxlength="80" value="${esc(e.name)}"><div class="dd" id="dd"><button type="button" class="btn alt" id="ddb" aria-haspopup="listbox" aria-expanded="${dop}" style="width:100%;display:flex;justify-content:space-between;align-items:center;margin:5px 0"><span id="ddt">${esc(curCat==='__c'?'✏️ Custom…':curCat)}</span><span>▾</span></button><div class="ddl ${dop?'':'hide'}" id="ddl" role="listbox">${catsAll().map(c=>`<div class="ddi"><button type="button" class="pk ${c===curCat?'on':''}" data-pick="${esc(c)}">${esc(c)}</button><button type="button" class="dx" data-cx="${esc(c)}" aria-label="Delete subject ${esc(c)}" title="Delete subject">×</button></div>`).join('')}<div class="ddi"><button type="button" class="pk" data-pick="__c">✏️ Custom…</button></div>${S.hid.length?'<div class="ddi"><a href="#" id="crs" class="mu" style="padding:8px 10px">Restore default subjects</a></div>':''}</div></div><input id="tcu" class="hide" placeholder="Type your own subject" maxlength="30">
+<div class="row"><label class="mu" style="flex:1">Start<input id="ts" type="time" value="${e.start}"></label><label class="mu" style="flex:1">End<input id="te" type="time" value="${e.end}"></label></div>
+<div class="row"><label class="mu" style="flex:1">Difficulty<select id="td"><option ${e.diff==='easy'?'selected':''}>easy</option><option ${e.diff==='medium'?'selected':''}>medium</option><option ${e.diff==='hard'?'selected':''}>hard</option></select></label><label class="mu" style="flex:1">Priority<select id="tp"><option ${e.pri==='normal'?'selected':''}>normal</option><option ${e.pri==='high'?'selected':''}>high</option></select></label></div>
+<input id="tx" placeholder="Description (optional)" maxlength="160" value="${esc(e.desc)}"><div class="mu">Repeat on</div><div class="row">${DAYN.map((n,i)=>`<label class="mu"><input type="checkbox" class="dc" value="${i}" ${e.days.includes(i)?'checked':''} style="width:16px;height:16px;margin:0 3px 0 0;accent-color:var(--p)">${n}</label>`).join('')}</div>
+<label class="mu"><input type="checkbox" id="tr" ${e.rem?'checked':''} style="width:16px;height:16px;margin:8px 4px 0 0;accent-color:var(--p)">Remind me at start time (while this page is open)</label>
+<div class="mu" id="est" style="margin:8px 0"></div><div class="row"><button class="btn" id="tsv">${ed?'Save changes':'Add task'}</button>${ed?'<button class="btn alt" id="tcx">Cancel</button>':''}</div><div class="err" id="te2"></div></div>
+<div class="card"><div class="row" style="margin-bottom:8px">${DAYN.map((n,i)=>`<button class="btn ${i===dsel?'':'alt'}" data-dy="${i}">${n}</button>`).join('')}</div>
+${S.tasks.filter(t=>t.days.includes(dsel)).map(t=>taskRow(t,'x',`<button class="btn alt" data-u="${t.id}" aria-label="Move up">↑</button><button class="btn alt" data-n="${t.id}" aria-label="Move down">↓</button><button class="btn alt" data-e="${t.id}">Edit</button><button class="btn alt" data-x="${t.id}">Delete</button>`)).join('')||'<p class="mu">No tasks on this day.</p>'}</div>`;
+const rd=()=>({name:$('#tn').value.trim(),cat:curCat==='__c'?$('#tcu').value.trim():curCat,start:$('#ts').value,end:$('#te').value,diff:$('#td').value,pri:$('#tp').value,desc:$('#tx').value.trim(),days:[...v.querySelectorAll('.dc:checked')].map(x=>+x.value),rem:$('#tr').checked});
+const est=()=>{const t=rd();$('#est').textContent='Estimated reward: '+pts(t)+' points (max 30 per task)'};v.querySelectorAll('#tn,#ts,#te,#td,#tp').forEach(x=>x.oninput=est);est();
+const closeDD=()=>{$('#ddl').classList.add('hide');$('#ddb').setAttribute('aria-expanded','false')};
+$('#ddb').onclick=e=>{e.stopPropagation();const h=$('#ddl').classList.toggle('hide');$('#ddb').setAttribute('aria-expanded',String(!h))};
+$('#ddl').onkeydown=e=>{if(e.key==='Escape'){closeDD();$('#ddb').focus()}};
+v.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{curCat=b.dataset.pick;$('#ddt').textContent=curCat==='__c'?'✏️ Custom…':curCat;$('#tcu').classList.toggle('hide',curCat!=='__c');if(curCat==='__c')$('#tcu').focus();closeDD();est()});
+v.querySelectorAll('[data-cx]').forEach(a=>a.onclick=e=>{e.stopPropagation();const c=a.dataset.cx;if(CATS.includes(c)&&!S.hid.includes(c))S.hid.push(c);S.cats=S.cats.filter(x=>x!==c);if(curCat===c)curCat=catsAll()[0]||'__c';draft=rd();save();ddOpen=true;render();toast('Subject deleted')});
+if($('#crs'))$('#crs').onclick=e=>{e.preventDefault();e.stopPropagation();S.hid=[];draft=rd();ddOpen=true;save();render()};
+$('#tr').onchange=()=>{if($('#tr').checked&&window.Notification&&Notification.permission==='default')Notification.requestPermission()};
+$('#tsv').onclick=()=>{const t=rd();if(!t.name)return $('#te2').textContent='Enter a task name.';if(!t.cat)return $('#te2').textContent='Type your subject name.';const ex=catsAll().find(c=>c.toLowerCase()===t.cat.toLowerCase());if(ex)t.cat=ex;if(!t.days.length)return $('#te2').textContent='Pick at least one day.';if(t.start&&t.end&&t.end<=t.start)return $('#te2').textContent='End time must be after start time.';
+if(!catsAll().includes(t.cat))S.cats.push(t.cat);if(ed)Object.assign(ed,t);else S.tasks.push({id:'t'+Date.now(),created:today(),...t});ed=null;save();render()};if($('#tcx'))$('#tcx').onclick=()=>{ed=null;render()};
+v.querySelectorAll('[data-dy]').forEach(b=>b.onclick=()=>{dsel=+b.dataset.dy;render()});
+v.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ed=S.tasks.find(t=>t.id===b.dataset.e);render();scrollTo(0,0)});
+v.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{S.tasks=S.tasks.filter(t=>t.id!==b.dataset.x);save();render()});
+const mv=(id,k)=>{const i=S.tasks.findIndex(t=>t.id===id),j=i+k;if(j<0||j>=S.tasks.length)return;[S.tasks[i],S.tasks[j]]=[S.tasks[j],S.tasks[i]];save();render()};
+v.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>mv(b.dataset.u,-1));v.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>mv(b.dataset.n,1))}
+else if(view==='rewards'){v.innerHTML=`<div class="card" style="margin-bottom:14px"><div class="mu">Wallet</div><div class="big" style="color:var(--gd)">${S.points} points</div></div>
+<div class="card" style="margin-bottom:14px"><h3>Add a reward</h3><input id="rn" placeholder="Reward name" maxlength="50"><input id="rd" placeholder="Description" maxlength="100"><div class="row"><select id="rc" aria-label="Category" style="flex:1">${RC.map(c=>`<option>${c}</option>`).join('')}</select><select id="rp" aria-label="Cost" style="flex:1">${COSTS.map(c=>`<option value="${c}">${c} points</option>`).join('')}</select></div><button class="btn" id="radd">Add reward</button><div class="err" id="re2"></div></div>
+<div class="grid">${S.rewards.map(r=>`<div class="card" id="c${r.id}"><b>${esc(r.n)}</b><div class="mu">${esc(r.d||'')}</div><div class="mu">${esc(r.cat)} · ${r.c} points · ${r.used?'Redeemed':S.points>=r.c?'Unlocked':'Locked'}</div><div class="row" style="margin-top:8px"><button class="btn" data-r="${r.id}" ${r.used||S.points<r.c?'disabled style="opacity:.4"':''}>${r.used?'Redeemed':'Redeem'}</button><button class="btn alt" data-rd="${r.id}">Remove</button></div></div>`).join('')}</div>`;
+$('#radd').onclick=()=>{const n=$('#rn').value.trim();if(!n)return $('#re2').textContent='Enter a reward name.';S.rewards.push({id:'r'+Date.now(),n,d:$('#rd').value.trim(),cat:$('#rc').value,c:+$('#rp').value});save();render()};
+v.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{S.rewards=S.rewards.filter(r=>r.id!==b.dataset.rd);save();render()});
+v.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=S.rewards.find(x=>x.id===b.dataset.r);if(!r||r.used||S.points<r.c||!COSTS.includes(r.c))return;r.used=true;S.points-=r.c;S.redeemed.push({n:r.n,c:r.c,d:today()});badgeCheck();save();render();$('#c'+r.id).classList.add('flash');toast('🎁 Redeemed: '+r.n,3000);confetti()})}
+else if(view==='badges'){v.innerHTML=`<div class="grid">${BADGES.map(b=>`<div class="card bdg ${S.badges[b.id]?'':'off'}"><span>${b.i}</span><div><b>${b.n}</b></div><div class="mu">${b.t}</div><div class="mu">${S.badges[b.id]?'Unlocked '+S.badges[b.id]:'Locked'}</div></div>`).join('')}</div>`}
+else if(view==='stats'){const days=[...Array(14)].map((_,i)=>{const k=today(13-i);return{k,p:dayPts(k),l:k.slice(5)}}),mx=Math.max(1,...days.map(x=>x.p));
+const rec=Object.entries(S.log).filter(([k])=>k>=today(29)),ds=rec.flatMap(([,x])=>Object.values(x.done)),ms=rec.flatMap(([,x])=>Object.values(x.missed)),cons=ds.length+ms.length?Math.round(ds.length/(ds.length+ms.length)*100):0;
+const by=(a,f,w)=>{const m={};a.forEach(x=>{const k=f(x);m[k]=(m[k]||0)+(w?w(x):1)});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+const catm=by(ds,x=>x.cat,x=>x.m),top=by(ds,x=>x.n).slice(0,5),wd=by(Object.entries(S.log),([k])=>DAYN[dow(k)],([k])=>dayPts(k)).filter(x=>x[1]>0);
+const w1=[...Array(7)].reduce((a,_,i)=>a+dayPts(today(i)),0),w0=[...Array(7)].reduce((a,_,i)=>a+dayPts(today(i+7)),0),m30=[...Array(30)].reduce((a,_,i)=>a+dayPts(today(i)),0);
+const cr=by(ds,x=>x.cat).filter(([c,n])=>n>=3).map(([c,n])=>[c,n/(n+ms.filter(m=>m.cat===c).length)]).sort((a,b)=>b[1]-a[1]),mc=by(ms,x=>x.cat);
+v.innerHTML=`<div class="grid"><div class="card"><div class="mu">Consistency (30 days)</div><div class="big">${cons}%</div></div><div class="card"><div class="mu">Points this week</div><div class="big">${w1}</div><div class="mu">${w0?(w1>=w0?'Up ':'Down ')+Math.abs(Math.round((w1-w0)/w0*100))+'% vs last week':'No data for last week yet'}</div></div><div class="card"><div class="mu">Points in 30 days</div><div class="big">${m30}</div></div><div class="card"><div class="mu">Missed in 30 days</div><div class="big" style="color:var(--er)">${ms.length}</div></div></div>
+<div class="card" style="margin-bottom:14px"><h3>Daily points, last 14 days</h3><div class="chart">${days.map(x=>`<div><i style="height:${x.p/mx*100}px"></i>${x.p}<br>${x.l}</div>`).join('')}</div></div>
+<div class="card" style="margin-bottom:14px"><h3>Activity, last 28 days</h3><div style="display:grid;grid-template-columns:repeat(14,1fr);gap:4px;margin-top:8px">${[...Array(28)].map((_,i)=>{const k=today(27-i),p=dayPts(k);return `<div title="${k}: ${p} pts" style="aspect-ratio:1;border-radius:4px;background:${p?`rgba(236,72,153,${Math.min(1,.25+p/133)})`:'var(--in)'}"></div>`}).join('')}</div></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"><div class="card"><h3>Study time by category (min)</h3>${catm.map(([c,m])=>`<div class="mu">${esc(c)} · ${m}<div class="bar"><i style="width:${m/catm[0][1]*100}%"></i></div></div>`).join('')||'<p class="mu">Complete tasks to see this.</p>'}</div>
+<div class="card"><h3>Insights</h3>${ds.length?`<p class="mu">Most productive day: <b>${wd[0]?wd[0][0]:'n/a'}</b></p><p class="mu">Most consistent category: <b>${cr[0]?esc(cr[0][0]):'need 3+ completions'}</b></p><p class="mu">Needs attention: <b>${mc[0]?esc(mc[0][0])+' ('+mc[0][1]+' missed)':'nothing missed'}</b></p><p class="mu">Top tasks: ${top.map(x=>esc(x[0])+' ×'+x[1]).join(', ')}</p>`:'<p class="mu">Insights appear after you complete tasks.</p>'}</div></div>`}
+else{const un=BADGES.filter(b=>S.badges[b.id]);v.innerHTML=`<div class="card" style="max-width:560px;margin-bottom:14px"><h3>Profile</h3><div class="mu">Level ${l.l} · ${S.xp} XP · ${S.earned} points earned · 🔥 ${streak()} · Joined ${S.made}</div>
+<div class="mu" style="margin-top:8px">Avatar</div><div class="row" style="margin:6px 0 10px">${AVS.map(a=>`<button class="btn alt" data-a="${a}">${a}</button>`).join('')}</div>
+<div class="mu">Theme color</div><div class="row" style="margin:6px 0 10px">${Object.entries(ACC).map(([n,c])=>`<button class="btn alt" data-ac="${n}" aria-label="${n}" style="border-color:${c}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${c}"></span></button>`).join('')}</div><label class="mu">Display name<input id="pn" value="${esc(S.name)}" maxlength="40"></label><label class="mu">Username<input id="pu" value="${esc(S.username)}" maxlength="30"></label><button class="btn" id="ps">Save profile</button></div>
+<div class="card" style="max-width:560px;margin-bottom:14px"><h3>Sound</h3><div class="row"><label class="mu" style="flex:1">Alarm sound<select id="sk">${['Alarm','Siren','Bell','Digital'].map(x=>`<option ${x===(S.snd||'Alarm')?'selected':''}>${x}</option>`).join('')}</select></label><label class="mu" style="flex:1">Volume<select id="sv">${['Low','Medium','High','Max'].map(x=>`<option ${x===(S.vol||'Max')?'selected':''}>${x}</option>`).join('')}</select></label></div><button class="btn" id="st">Test sound</button><p class="mu">The alarm rings when a task's end time arrives or a focus session ends. Keep this tab open. Use the 🔔 button in the header to mute.</p></div>
+<div class="card" style="max-width:560px;margin-bottom:14px"><h3>Inventory</h3><div class="row">${un.map(b=>`<span title="${b.n}" style="font-size:1.8rem">${b.i}</span>`).join('')||'<span class="mu">No badges yet.</span>'}</div><h3 style="margin-top:12px">Reward history</h3>${S.redeemed.map(r=>`<div class="mu">${esc(r.n)} · ${r.c} pts · ${r.d}</div>`).join('')||'<p class="mu">Nothing redeemed yet.</p>'}</div>
+<div class="card" style="max-width:560px"><h3>Account and backup</h3><input id="cp0" type="password" placeholder="Current password" autocomplete="current-password"><input id="cp1" type="password" placeholder="New password (min 8)" autocomplete="new-password"><div class="row"><button class="btn alt" id="pc">Change password</button><button class="btn alt" id="ex">Export backup</button><label class="btn alt" style="display:inline-block">Import backup<input id="im" type="file" accept=".json" class="hide"></label><button class="btn alt" id="po">Log out</button><button class="btn dg" id="pd">Delete account</button></div><div class="err" id="pe" role="alert"></div>
+<p class="mu">About: HabitTracker X was created with dedication by <b>MUTTAKIN</b>.</p></div>`;
+v.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.avatar=b.dataset.a;save();render()});
+v.querySelectorAll('[data-ac]').forEach(b=>b.onclick=()=>{S.accent=b.dataset.ac;setTheme(S.theme);save()});
+$('#sk').onchange=()=>{S.snd=$('#sk').value;save();alarm('Sound test',1)};$('#sv').onchange=()=>{S.vol=$('#sv').value;save();alarm('Volume test',1)};$('#st').onclick=()=>alarm('Sound test',1);
+$('#ps').onclick=()=>{S.name=$('#pn').value.trim()||S.name;S.username=$('#pu').value.trim()||S.username;save();render();toast('Profile saved')};
+$('#pc').onclick=async()=>{const n=$('#cp1').value;if(!await chk(user.email,$('#cp0').value))return $('#pe').textContent='Current password is wrong.';if(n.length<8)return $('#pe').textContent='New password needs at least 8 characters.';const u=U(),salt=crypto.getRandomValues(new Uint8Array(16));u[user.email].salt=b64(salt);u[user.email].hash=await hash(n,salt);setU(u);$('#pe').textContent='';$('#cp0').value=$('#cp1').value='';toast('Password changed')};
+$('#po').onclick=out;
+$('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'HabitTrackerX',v:2,data:S})],{type:'application/json'}));a.download='habittracker-backup-'+today()+'.json';a.click();toast('Backup downloaded')};
+$('#im').onchange=async e=>{try{const o=JSON.parse(await e.target.files[0].text()),x=o&&o.data;if(!x||!Array.isArray(x.tasks)||typeof x.log!=='object'||!Array.isArray(x.redeemed)||!Array.isArray(x.rewards))throw 0;if(x.tasks.some(t=>!t.id||!Array.isArray(t.days)||!BASE[t.diff]))throw 0;
+localStorage.setItem('htx_prev_'+user.email,JSON.stringify(S));S=Object.assign(fresh(user.email),x);norm();save();setTheme(S.theme||'dark');render();toast('Backup imported')}catch(x){$('#pe').textContent='Import failed. The file is not a valid HabitTracker X backup. Nothing was changed.'}};
+$('#pd').onclick=()=>{$('#mod').classList.remove('hide');$('#modB').innerHTML='<h3>Delete account?</h3><p class="mu">This permanently erases your data and cannot be undone.</p><input id="dp" type="password" placeholder="Enter your password to confirm"><div class="row"><button class="btn dg" id="yes">Delete forever</button><button class="btn alt" id="no">Cancel</button></div><div class="err" id="me"></div>';
+$('#no').onclick=()=>$('#mod').classList.add('hide');$('#yes').onclick=async()=>{if(!await chk(user.email,$('#dp').value))return $('#me').textContent='Wrong password.';const u=U();delete u[user.email];setU(u);localStorage.removeItem('htx_d_'+user.email);localStorage.removeItem('htx_prev_'+user.email);$('#mod').classList.add('hide');out()}}}
+v.querySelectorAll('[data-t]').forEach(c=>c.onchange=()=>complete(c.dataset.t));
+v.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const t=S.tasks.find(x=>x.id===b.dataset.f),m=mins(t);F={id:t.id,name:t.name,total:m*60,left:m*60,run:true,last:Date.now()};render();toast('Focus started: '+m+' min')});
+if($('#fp'))$('#fp').onclick=()=>{if(!F.left)return;F.run=!F.run;F.last=Date.now();render()};
+if($('#fr'))$('#fr').onclick=()=>{F.left=F.total;F.run=false;render()};
+if($('#fx'))$('#fx').onclick=()=>{F=null;render()};
+if($('#fd'))$('#fd').onclick=()=>{const id=F.id;F=null;complete(id)};
+if($('#qgo')){const rq=()=>{const c=(i,m)=>Math.max(0,Math.min(m,parseInt($(i).value)||0));QT.h=c('#qh',99);QT.m=c('#qm',59);QT.s=c('#qs',59)};
+['#qh','#qm','#qs'].forEach(i=>$(i).oninput=()=>{rq();if(!QT.total)$('#qd').textContent=hms(QT.h*3600+QT.m*60+QT.s)});
+$('#qgo').onclick=()=>{if(QT.run){QT.run=false;return render()}rq();if(!QT.total||QT.left<=0){const t=QT.h*3600+QT.m*60+QT.s;if(t<1)return toast('Set a time first.');QT.total=QT.left=t}QT.run=true;QT.last=Date.now();render()};
+$('#qrs').onclick=()=>{QT.total=0;QT.left=0;QT.run=false;render()};
+v.querySelectorAll('[data-qp]').forEach(b=>b.onclick=()=>{const t=+b.dataset.qp;QT={h:t/3600|0,m:t%3600/60|0,s:0,total:0,left:0,run:false,last:0};render()})}
+if($('#fbk'))$('#fbk').onclick=()=>{F={id:F.id,name:'Break time ☕',brk:1,total:300,left:300,run:true,last:Date.now()};render()};
+if($('#wg'))$('#wg').onchange=()=>{S.wg=+$('#wg').value;save();render()};
+if($('#chest'))$('#chest').onclick=()=>{const g=G(today()),tt=sched(today());if(g.chest||g.rest||tt.length<2||tt.some(t=>!g.done[t.id]))return;const a=[5,5,8,8,10,12,15,25][Math.random()*8|0];L(today()).chest=a;S.chests++;S.points+=a;S.xp+=a;S.earned+=a;badgeCheck();save();render();confetti();toast('🎁 Chest: +'+a+' bonus points!',4000)};
+tick()}
+setInterval(()=>{if(!user||!S)return;const d=today(),hm=new Date().toTimeString().slice(0,5);sched(d).forEach(t=>{const k=d+t.id+hm;if(t.rem&&t.start===hm&&!G(d).done[t.id]&&S.rn!==k){S.rn=k;toast('⏰ '+t.name+' starts now',5000);try{if(Notification.permission==='granted')new Notification('HabitTracker X',{body:t.name+' starts now'})}catch(x){}}})},20000);
+const s0=localStorage.getItem('htx_s');if(s0&&U()[s0])start(s0);else $('#auth').classList.remove('hide');
+</script>
+<style>
+#v .extwrap{display:grid;gap:14px}
+#v .extcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+#v .extday{padding:9px 2px;border:1px solid var(--bd);border-radius:9px;text-align:center;background:var(--card);min-height:52px;font-size:.82rem}
+#v .extday.sel{outline:2px solid var(--p)}#v .extday.done{background:rgba(34,197,94,.18)}#v .extday.today{border-color:var(--pk)}
+#v .extday small{display:block;color:var(--mu);font-size:.66rem;margin-top:3px}
+#v .extlist{display:flex;flex-wrap:wrap;gap:8px}
+#v .extlist input,#v .extlist select{flex:1;min-width:110px}
+#v .extgoal{padding:12px;border:1px solid var(--bd);border-radius:12px;margin:8px 0}
+#v .extgoal .bar{margin:8px 0}
+@media print{nav,header,footer,.btn,#toast{display:none!important}body{background:white!important;color:#111!important}#app,#v,.card{display:block!important;background:white!important;color:#111!important;box-shadow:none!important;border-color:#ddd!important}}
+</style>
+
+<script>
+(()=> {
+  const extInit=()=>{if(!S.ext)S.ext={goals:[],calOffset:0,calPick:today(),dash:{},pomo:{work:25,short:5,long:15,cycles:4},lastReport:null};S.ext.goals ||= [];S.ext.dash ||= {};S.ext.pomo ||= {work:25,short:5,long:15,cycles:4};};
+  const eSave=()=>{extInit();save()};
+  const eEsc=s=>esc(String(s??''));
+  const eDate=(y,m,d)=>{const x=new Date(y,m,d);return x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})};
+  const eKey=(dt)=>{const d=new Date(dt);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+  const eTaskCount=(date)=>{const gg=G(date),tt=sched(date);return {all:tt.length,done:tt.filter(t=>gg.done[t.id]).length,pts:dayPts(date)}};
+  const eProgress=(goal)=>goal.kind==='points'?S.points:goal.kind==='tasks'?Object.values(S.log||{}).reduce((a,g)=>a+Object.keys(g.done||{}).length,0):goal.kind==='streak'?streak():Math.max(0,+goal.current||0);
+  const eRender=()=>{
+    extInit();const v=$('#v'),ex=S.ext;
+    if(view==='calendar'){
+      const now=new Date(),month=new Date(now.getFullYear(),now.getMonth()+ex.calOffset,1),y=month.getFullYear(),m=month.getMonth(),first=month.getDay(),days=new Date(y,m+1,0).getDate(),pick=ex.calPick||today();
+      let cells=Array(first).fill('<div></div>').concat(Array.from({length:days},(_,i)=>{const k=eKey(new Date(y,m,i+1)),c=eTaskCount(k);return `<button class="extday ${k===pick?'sel':''} ${k===today()?'today':''} ${c.all&&c.done===c.all?'done':''}" data-calpick="${k}">${i+1}<small>${c.done}/${c.all}</small></button>`}));
+      const selected=eTaskCount(pick),tasks=sched(pick),g=G(pick);
+      v.innerHTML=`<div class="extwrap"><div class="card"><div class="row" style="justify-content:space-between"><button class="btn alt" id="calprev">←</button><h3>${month.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h3><button class="btn alt" id="calnext">→</button></div><div class="extcal" style="margin-top:12px">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="mu" style="text-align:center">${x}</div>`).join('')}${cells.join('')}</div><p class="mu">Each date shows completed and scheduled tasks.</p></div><div class="card"><h3>${eDate(...pick.split('-').map(Number).map((n,i)=>i===1?n-1:n))} · ${selected.done}/${selected.all} completed · ${selected.pts} pts</h3>${tasks.map(t=>`<div class="mu" style="padding:7px 0">${g.done[t.id]?'✅':'◻️'} ${eEsc(t.name)} · ${eEsc(t.cat)}</div>`).join('')||'<p class="mu">No tasks are scheduled for this day.</p>'}<button class="btn alt" id="caltoday">Today</button></div></div>`;
+      $('#calprev').onclick=()=>{ex.calOffset--;eSave();eRender()};$('#calnext').onclick=()=>{ex.calOffset++;eSave();eRender()};$('#caltoday').onclick=()=>{ex.calOffset=0;ex.calPick=today();eSave();eRender()};v.querySelectorAll('[data-calpick]').forEach(b=>b.onclick=()=>{ex.calPick=b.dataset.calpick;eSave();eRender()});return true;
+    }
+    if(view==='goals'){
+      const goals=ex.goals;
+      v.innerHTML=`<div class="card"><h3>Personal goals</h3><p class="mu">Track points, completed tasks, streak, or a custom goal.</p><div class="extlist"><input id="egname" placeholder="Goal name" maxlength="55"><select id="egkind"><option value="points">Total points</option><option value="tasks">Tasks completed</option><option value="streak">Current streak</option><option value="custom">Custom progress</option></select><input id="egtarget" type="number" min="1" placeholder="Target"><button class="btn" id="egadd">Add goal</button></div></div><div class="card"><h3>Your goals</h3>${goals.map((g,i)=>{const p=eProgress(g),pct=Math.min(100,Math.round(p/(g.target||1)*100));return `<div class="extgoal"><div class="row" style="justify-content:space-between"><b>${eEsc(g.name)}</b><button class="btn alt" data-egdel="${i}">Remove</button></div><div class="mu">${Math.min(p,g.target)} / ${g.target} ${g.kind==='points'?'points':g.kind==='tasks'?'tasks':g.kind==='streak'?'days':'units'}</div><div class="bar"><i style="width:${pct}%"></i></div>${g.kind==='custom'?`<div class="extlist"><input data-egcur="${i}" type="number" min="0" value="${g.current||0}"><button class="btn alt" data-egsave="${i}">Update</button></div>`:''}${pct>=100?'<div class="okm">🎉 Goal achieved!</div>':''}</div>`}).join('')||'<p class="mu">Enter a goal name and a target.</p>'}</div><div class="card"><button class="btn alt" id="egprint">Print / Save as PDF</button></div>`;
+      $('#egadd').onclick=()=>{const n=$('#egname').value.trim(),t=+$('#egtarget').value,k=$('#egkind').value;if(!n||t<1)return toast('No goals yet. Add one above.');goals.push({name:n,target:t,kind:k,current:0,created:today()});eSave();eRender()};v.querySelectorAll('[data-egdel]').forEach(b=>b.onclick=()=>{goals.splice(+b.dataset.egdel,1);eSave();eRender()});v.querySelectorAll('[data-egsave]').forEach(b=>b.onclick=()=>{goals[+b.dataset.egsave].current=+v.querySelector(`[data-egcur="${b.dataset.egsave}"]`).value||0;eSave();eRender()});$('#egprint').onclick=()=>print();return true;
+    }
+    if(view==='planner'){
+      const wkdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],byday=wkdays.map((d,i)=>({d,t:S.tasks.filter(t=>Array.isArray(t.days)&&t.days.includes(i))})),done=Object.values(S.log||{}).reduce((a,g)=>a+Object.keys(g.done||{}).length,0),active=S.tasks.length;
+      const plan=byday.map(x=>`<div class="extgoal"><b>${x.d}</b><div class="mu">${x.t.length} routine(s): ${x.t.map(t=>eEsc(t.name)).join(', ')||'Rest / flexible day'}</div></div>`).join('');
+      v.innerHTML=`<div class="card"><h3>Smart study planner ✨</h3><p class="mu">Suggestions are built on this device from your routines and completion history. No external AI is used.</p><div class="grid"><div><div class="mu">Saved routines</div><div class="big">${active}</div></div><div><div class="mu">Tasks completed (all logs)</div><div class="big">${done}</div></div><div><div class="mu">Current streak</div><div class="big">${streak()} 🔥</div></div></div><h3 style="margin-top:12px">Weekly routine map</h3>${plan}<div class="card"><h3>Suggestions</h3><ul class="mu">${active===0?'<li>Add 2–3 short tasks in Routine first.</li>':''}<li>Place hard tasks early in the day and light tasks after breaks.</li><li>Take a 5-minute break after every focus session.</li><li>Split the subject you miss most into 15–20 minute blocks.</li><li>At the end of the week, check Analytics and adjust next week's workload.</li></ul><button class="btn" id="plprint">Save weekly plan as PDF</button></div></div>`;
+      $('#plprint').onclick=()=>print();return true;
+    }
+    return false;
+  };
+  const oldRender=render;
+  render=function(){if(['calendar','goals','planner'].includes(view)){eRender();return}oldRender();};
+  // Export report tools and PWA install prompt
+  const installBtn=document.createElement('button');installBtn.className='btn alt';installBtn.id='pwaInstall';installBtn.textContent='Install app';installBtn.style.display='none';
+  const foot=document.querySelector('footer');if(foot)foot.appendChild(installBtn);
+  let installEvent=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvent=e;installBtn.style.display='inline-block'});
+  installBtn.onclick=async()=>{if(installEvent){installEvent.prompt();await installEvent.userChoice;installEvent=null;installBtn.style.display='none'}else toast('Open your browser menu and choose Install app.');
+  };
+  // Add practical report export in analytics view, appended after original render.
+  document.querySelector('nav').addEventListener('click',()=>setTimeout(()=>{
+    if(view==='stats'&&user&&S&&!$('#reportTools')){
+      const card=document.createElement('div');card.id='reportTools';card.className='card';card.style.margin='14px 0';
+      card.innerHTML='<h3>Reports</h3><p class="mu">Download a 30-day summary as CSV, or print and save as PDF.</p><div class="row"><button class="btn" id="csv30">Download 30-day CSV</button><button class="btn alt" id="pdf30">Print / Save PDF</button></div>';
+      $('#v').appendChild(card);
+      $('#csv30').onclick=()=>{const rows=[['Date','Scheduled','Completed','Points'],...Array.from({length:30},(_,i)=>{const d=today(29-i),c=eTaskCount(d);return[d,c.all,c.done,c.pts]})];const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='habittracker-report-30-days.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('CSV report downloaded')};
+      $('#pdf30').onclick=()=>print();
+    }
+  },0));
+  // Timer state survives reload: save remaining duration with timestamp, restore at login.
+  const oldStart=start;
+  start=function(e){oldStart(e);extInit();if(S.ext.timer){const z=S.ext.timer;QT.h=z.h||0;QT.m=z.m||0;QT.s=z.s||0;QT.total=z.total||0;QT.left=z.run?Math.max(0,z.left-(Date.now()-z.last)/1000):z.left;QT.run=!!z.run&&QT.left>0;QT.last=Date.now();} };
+  const persistTimer=()=>{if(!S||!user)return;extInit();S.ext.timer={h:QT.h,m:QT.m,s:QT.s,total:QT.total,left:QT.left,run:QT.run,last:Date.now()};save()};
+  // Persist timer at each start/pause/preset/reset and once per minute during active run.
+  const timerObs=setInterval(()=>{if(user&&S&&QT.run)persistTimer()},60000);
+  document.addEventListener('click',e=>{if(e.target.closest('#qgo,#qrs,[data-qp],#fp,#fr,#fbk,#fx'))setTimeout(persistTimer,50)});
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+  // Request notification permission from explicit click, never automatically.
+  window.addEventListener('click',e=>{const b=e.target.closest('#enableNotifs');if(b&&'Notification'in window)Notification.requestPermission().then(p=>toast('Notifications: '+p));});
+  // Dashboard personalisation control on profile page
+  const originalProfileRender=render;
+  document.querySelector('nav').addEventListener('click',()=>setTimeout(()=>{
+    if(view==='prof'&&user&&S&&!$('#dashCustomize')){
+      const c=document.createElement('div');c.id='dashCustomize';c.className='card';c.style.maxWidth='560px';c.innerHTML='<h3>Dashboard & notifications</h3><p class="mu">Notification permission is optional. Browser notification will work only while app/browser allows it.</p><div class="row"><button class="btn alt" id="enableNotifs">Enable notifications</button><button class="btn alt" id="printAll">Print / Save report PDF</button></div><p class="mu">Cloud sync note: this version is local-first. Multi-device login and shared data require Supabase/Firebase project credentials and backend rules.</p>';
+      $('#v').appendChild(c);$('#printAll').onclick=()=>print();
+    }
+  },0));
+})();
+</script>
+<style>
+.btn:disabled{opacity:.4;cursor:not-allowed}
+#gc{display:grid;gap:14px}
+.gbal{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.gbal p{margin:0;max-width:340px}
+.gtabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.gtabs .btn{white-space:nowrap;flex:none}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.gi,.gnew,.gpet{display:flex;gap:12px;align-items:flex-start}.gi{flex-wrap:wrap}
+.gi.own{border-color:var(--ok)}.gx{flex:1;min-width:140px}.gic{font-size:2rem;line-height:1.1;flex:none;min-width:2.4rem;text-align:center}
+.gbuy{display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-left:auto}.gpr{color:var(--gd);font-weight:800;font-size:.9rem}
+.gnew{border-color:var(--gd)}
+.gsky{border-radius:16px;padding:22px 10px 8px;background:linear-gradient(180deg,#3b2f8f,#6d5bd0 55%,#f0abfc);border:1px solid var(--bd);overflow:hidden}
+.gisl{max-width:460px;margin:0 auto}.gtop{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px;padding:12px;background:#4ade80;background:linear-gradient(#6ee7a0,#34b36b);border-radius:18px 18px 40px 40px}
+.gsl{height:46px;display:grid;place-items:center;font-size:1.7rem;border-radius:10px}.gsl.em{border:1px dashed rgba(255,255,255,.55)}
+.grock{height:34px;margin:0 14%;background:linear-gradient(#8b6b4a,#5b4330);border-radius:0 0 60% 60%}
+@media(max-width:520px){.ggrid{grid-template-columns:1fr}.gbuy{flex-direction:row;align-items:center;width:100%;justify-content:space-between}}
+</style>
+<style>
+.gsky.night{background:linear-gradient(180deg,#0b0a2b,#241b6b 60%,#4b2a7a)}
+.gspace{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:2rem;padding:14px;margin-bottom:12px;border-radius:16px;background:radial-gradient(circle at 20% 30%,#2a2170,#07061a);border:1px solid var(--bd)}.gspace .off{filter:grayscale(1);opacity:.35}
+.gach{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}.gac{border:1px solid var(--bd);border-radius:10px;padding:8px;text-align:center;font-size:.8rem}.gac.off{opacity:.4;filter:grayscale(1)}
+.gbook{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.gbk{text-align:center;border:1px solid var(--bd);border-radius:10px;padding:8px}.gbk span{font-size:1.8rem}.gbk.off{opacity:.45}
+.tlog{max-height:55vh;overflow:auto;padding:4px}.tmsg{padding:10px 12px;border-radius:12px;margin:8px 0;max-width:92%;overflow-wrap:anywhere;line-height:1.5}.tmsg.u{background:linear-gradient(90deg,var(--p),var(--pk));color:#fff;margin-left:auto}.tmsg.a{background:var(--in);border:1px solid var(--bd)}
+.tmsg pre,.tpre{white-space:pre-wrap;overflow-x:auto;background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:8px;margin:6px 0;font-family:ui-monospace,Menlo,monospace;font-size:.85rem}.tmsg code{background:rgba(139,92,246,.2);padding:1px 5px;border-radius:5px}
+details summary{cursor:pointer}details .card,details>label{display:block}
+</style>
+
+<script>
+(()=>{
+/* ===== Game Center: data definitions ===== */
+const ISL=[{n:'Seed Islet',s:6},{n:'Meadow Isle',s:10,c:80},{n:'Grove Isle',s:14,c:160},{n:'Summit Isle',s:20,c:300}];
+const ITEMS=[
+{id:'pine',n:'Pine tree',i:'🌲',p:10,max:4,t:1,d:'Fresh green shade for your islet.'},
+{id:'flower',n:'Flower patch',i:'🌼',p:6,max:4,t:1,d:'A small splash of colour.'},
+{id:'lantern',n:'Stone lantern',i:'🏮',p:15,max:3,t:1,d:'Warm light for quiet evenings.'},
+{id:'cabin',n:'Cozy cabin',i:'🏡',p:40,max:1,t:1,d:'A tiny home with a chimney.'},
+{id:'bridge',n:'Rope bridge',i:'🌉',p:30,max:1,t:1,d:'Links your island to the clouds.'},
+{id:'pond',n:'Lotus pond',i:'🪷',p:45,max:1,t:2,d:'Still water and floating blooms.'},
+{id:'fountain',n:'Crystal fountain',i:'⛲',p:55,max:1,t:2,d:'Water that sparkles in the sun.'},
+{id:'orchard',n:'Apple tree',i:'🍎',p:35,max:3,t:2,d:'Grows sweet fruit all year.'},
+{id:'treehouse',n:'Treehouse',i:'🛖',p:90,max:1,t:3,d:'A lookout hut in the branches.'},
+{id:'tower',n:'Sky tower',i:'🗼',p:120,max:1,t:3,d:'See every cloud for miles.'},
+{id:'shrine',n:'Moon shrine',i:'⛩️',p:110,max:1,t:4,d:'A calm place under the stars.'},
+{id:'rainbow',n:'Rainbow arch',i:'🌈',p:150,max:1,t:4,d:'The crown of your island.'},
+{id:'bench',n:'Garden bench',i:'🪑',p:12,max:3,t:1,d:'A quiet seat with a view.'},
+{id:'tent',n:'Stargazing tent',i:'⛺',p:50,max:1,t:2,d:'Camp out under the sky.'},
+{id:'balloon',n:'Hot-air balloon',i:'🎈',p:85,max:1,t:3,d:'A slow ride around the island.'},
+{id:'whale',n:'Sky whale',i:'🐋',p:200,max:1,t:4,d:'A gentle giant that visits your island.'}];
+const EGG=30,HAB=[50,100,180],MAXLV=10;
+const CARE={berry:{n:'Berry snack',i:'🫐',p:4,h:18,x:8,v:'Feed'},toy:{n:'Cuddle toy',i:'🧸',p:6,h:10,x:14,v:'Play'},gold:{n:'Golden treat',i:'✨',p:12,h:30,x:25,v:'Spoil'}};
+const RARW={Common:60,Uncommon:25,Rare:12,Legendary:3},STAGE=['Hatchling','Juvenile','Guardian'];
+const SPECIES=[
+{id:'pup',n:'Pebble Pup',e:'🐶',r:'Common'},{id:'bun',n:'Mint Bunny',e:'🐰',r:'Common'},{id:'chick',n:'Cloud Chick',e:'🐥',r:'Common'},{id:'frog',n:'Dew Frog',e:'🐸',r:'Common'},
+{id:'fox',n:'Ember Fox',e:'🦊',r:'Uncommon'},{id:'owl',n:'Moon Owl',e:'🦉',r:'Uncommon'},{id:'seal',n:'Coral Seal',e:'🦭',r:'Uncommon'},
+{id:'panda',n:'Star Panda',e:'🐼',r:'Rare'},{id:'deer',n:'Aurora Deer',e:'🦌',r:'Rare'},{id:'tide',n:'Tide Dragon',e:'🐲',r:'Rare'},
+{id:'uni',n:'Void Unicorn',e:'🦄',r:'Legendary'},{id:'sun',n:'Sun Dragon',e:'🐉',r:'Legendary'}];
+const KEY_P=15,HINT_P=5;
+const ROOMS=[
+{id:'r1',n:'Echo Hall',k:'Riddle',r:3,a:['shadow'],h:'You can see me on the ground whenever light hits you.',q:'I follow you in sunshine, vanish in the dark, and copy every move you make without a sound. What am I?'},
+{id:'r2',n:'Number Bridge',k:'Sequence',r:3,a:['42'],h:'Look at the gaps between numbers: 4, 6, 8, 10 and so on.',q:'What comes next? 2, 6, 12, 20, 30, ...'},
+{id:'r3',n:'Mixed-up Pantry',k:'Logic',r:4,a:['mixed','mixed fruit'],h:'The box labeled Mixed must hold only apples. Now think about the other two boxes.',q:'Three boxes are labeled Apples, Oranges and Mixed, but every label is wrong. You take one fruit from the box labeled Mixed and it is an apple. What is really inside the box labeled Oranges?'},
+{id:'r4',n:'Streak Stairs',k:'Math',r:5,a:['10','week 10','tenth'],h:'Week n has 5 + 3 x (n - 1) days.',q:'A streak lasts 5 days in week 1 and grows by 3 days each week, so week 2 is 8 days. In which week does it first pass 30 days?'},
+{id:'r5',n:'Wet Wall',k:'Riddle',r:6,a:['sponge'],h:'You will find me near a kitchen sink or a bath.',q:'I am full of holes, yet I can hold water. What am I?'},
+{id:'r6',n:'Relay Track',k:'Logic',r:7,a:['eli'],h:'Write the finishing order: Gus first, then Dev, then ...',q:'Four runners finish a race. Dev finished before Eli. Fay finished after Eli. Gus finished before Dev. Who came in third?'},
+{id:'r7',n:'Scrambled Scroll',k:'Word',r:8,a:['silent'],h:'It starts with the letter S.',q:'Rearrange the letters of LISTEN to spell a word that means quiet.'},
+{id:'r8',n:'Vault of Digits',k:'Math',r:10,a:['74'],h:'Tens + ones = 11, and tens - ones = 3.',q:'I am a two-digit number. My digits add up to 11, and my tens digit is 3 more than my ones digit. What number am I?'},
+{id:'r9',n:'Kitchen Cellar',k:'Riddle',r:11,a:['egg'],h:'Breakfast. You crack me open before cooking.',q:'I must be cracked before I can be used, and I can be scrambled, fried or boiled. What am I?'},
+{id:'r10',n:'Spiral Stairs',k:'Sequence',r:12,a:['21','twenty one'],h:'Each number is the sum of the two before it.',q:'What comes next? 1, 1, 2, 3, 5, 8, 13, ...'},
+{id:'r11',n:'Runaway Pen',k:'Logic',r:13,a:['9','nine'],h:'Read it slowly: all but 9 means 9 stay.',q:'A farmer has 17 sheep. All but 9 run away. How many sheep are left?'},
+{id:'r12',n:'Guardian Gate',k:'Boss',r:14,a:['3','three'],h:'Each cat catches one mouse in 3 minutes.',q:'If 3 cats catch 3 mice in 3 minutes, how many minutes do 100 cats need to catch 100 mice?'}];
+const SHIPS=[{n:'Scout Skiff',tank:20},{n:'Voyager',tank:30,c:40},{n:'Pathfinder',tank:40,c:80},{n:'Starhopper',tank:55,c:140},{n:'Aurora Cruiser',tank:70,c:220}];
+const FUEL_PACK=5,FUEL_P=5;
+const PLANETS=[
+{id:'haven',n:'Haven',e:'🌍',p:0,o:30,s:1,d:'Your home planet. Calm oceans and a busy launch pad.',m:[['Orbital patrol',3,2],['Moon survey',5,3]]},
+{id:'ember',n:'Ember Reach',e:'🌋',p:60,o:50,s:1,d:'A volcanic world with rivers of glowing rock.',m:[['Scan the lava fields',6,4],['Deploy a heat drill',8,6]]},
+{id:'glacier',n:'Glacier-9',e:'🧊',p:110,o:80,s:2,d:'An ice world with deep blue canyons.',m:[['Map the ice canyons',8,6],['Core sample the glacier',10,8]]},
+{id:'verdant',n:'Verdant Reach',e:'🌿',p:170,o:120,s:3,d:'Jungle moons wrapped in warm mist.',m:[['Catalogue new plants',10,8],['Build a greenhouse outpost',12,10]]},
+{id:'nebula',n:'Nebula Garden',e:'🌌',p:250,o:160,s:4,d:'A planet floating inside a glowing gas cloud.',m:[['Chart the gas currents',14,12],['Launch a beacon',16,14]]},
+{id:'rings',n:'Halcyon Rings',e:'🪐',p:380,o:220,s:5,d:'A ringed giant with crystal-clear orbits.',m:[['Fly the ring gap',18,16],['Found a ring colony',22,20]]}];
+/* ===== helpers ===== */
+function modal(h,ok,fn){$('#mod').classList.remove('hide');$('#modB').innerHTML=h+'<div class="row" style="margin-top:10px"><button class="btn" id="gmok">'+ok+'</button><button class="btn alt" id="gmno">Cancel</button></div>';$('#gmno').onclick=()=>$('#mod').classList.add('hide');$('#gmok').onclick=()=>{fn();$('#mod').classList.add('hide')}}
+const rank=()=>{const s=S.game.space;return 1+(Object.keys(s.missions).length/2|0)+Object.keys(s.outposts).length},dRank=n=>n>=ROOMS.length?'Archmage':n>=8?'Sage':n>=4?'Delver':'Novice';
+const g=()=>S.game,cl=(n,a,b)=>Math.min(b,Math.max(a,Math.floor(+n)||0)),isObj=o=>o&&typeof o==='object'&&!Array.isArray(o);
+const sp=id=>SPECIES.find(x=>x.id===id),slots=()=>ISL[g().island.tier-1].s,used=()=>Object.values(g().island.items).reduce((a,b)=>a+b,0);
+const cap=()=>3+2*g().pets.hab,tank=()=>SHIPS[g().space.ship-1].tank,need=lv=>20+10*lv,stage=c=>c.lv>=6?2:c.lv>=3?1:0;
+const hap=c=>Math.max(0,c.hap-Math.floor((Date.now()-c.t)/5400000));
+function gnorm(){
+const o=S.game=isObj(S.game)?S.game:{};
+o.seen=Number.isFinite(+o.seen)?Math.min(+o.seen,S.earned):S.earned;
+o.tx=Array.isArray(o.tx)?o.tx.filter(x=>isObj(x)&&['earn','spend','refund'].includes(x.t)&&Number.isFinite(+x.a)).slice(-200).map(x=>({d:String(x.d||'').slice(0,10),t:x.t,a:Math.max(0,Math.floor(+x.a)),n:String(x.n||'').slice(0,60)})):[];
+const i=o.island=isObj(o.island)?o.island:{};i.tier=cl(i.tier||1,1,ISL.length);i.night=!!i.night;const it0=isObj(i.items)?i.items:{};i.items={};ITEMS.forEach(x=>{const n=cl(it0[x.id],0,x.max);if(n)i.items[x.id]=n});
+const p=o.pets=isObj(o.pets)?o.pets:{};p.hab=cl(p.hab,0,HAB.length);p.inv=isObj(p.inv)?p.inv:{};Object.keys(CARE).forEach(k=>p.inv[k]=cl(p.inv[k],0,20));p.hatched=cl(p.hatched,0,9999);
+p.list=(Array.isArray(p.list)?p.list:[]).filter(c=>isObj(c)&&sp(c.sp)).slice(0,3+2*p.hab).map((c,k)=>({id:String(c.id||'c'+k).slice(0,30),sp:c.sp,name:String(c.name||sp(c.sp).n).slice(0,30),lv:cl(c.lv||1,1,MAXLV),xp:cl(c.xp,0,9999),hap:cl(c.hap??60,0,100),t:Number.isFinite(+c.t)?+c.t:Date.now()}));
+const sn=isObj(p.seen)?p.seen:{};p.seen={};SPECIES.forEach(x=>{if(sn[x.id])p.seen[x.id]=1});p.list.forEach(c=>p.seen[c.sp]=1);
+const d=o.dungeon=isObj(o.dungeon)?o.dungeon:{};d.tries=cl(d.tries,0,99999);d.keys=cl(d.keys,0,99);d.hints=cl(d.hints,0,99);['opened','done','hintUsed'].forEach(k=>{const s=isObj(d[k])?d[k]:{};d[k]={};ROOMS.forEach(r=>{if(s[r.id])d[k][r.id]=1})});ROOMS.forEach(r=>{if(d.done[r.id])d.opened[r.id]=1});
+const s=o.space=isObj(o.space)?o.space:{};s.ship=cl(s.ship||1,1,SHIPS.length);s.fuel=cl(s.fuel,0,SHIPS[s.ship-1].tank);const pl=isObj(s.planets)?s.planets:{};s.planets={haven:1};PLANETS.forEach(x=>{if(pl[x.id]&&x.s<=s.ship)s.planets[x.id]=1});
+const ms=isObj(s.missions)?s.missions:{};s.missions={};PLANETS.forEach(x=>x.m.forEach((_,k)=>{if(ms[x.id+'.'+k]&&s.planets[x.id])s.missions[x.id+'.'+k]=1}));
+const op=isObj(s.outposts)?s.outposts:{};s.outposts={};PLANETS.forEach(x=>{if(op[x.id]&&s.planets[x.id])s.outposts[x.id]=1});
+if(isObj(S.ext))delete S.ext.friends}
+function tx(t,a,n){const o=g(),l=o.tx[o.tx.length-1];if(t==='earn'&&l&&l.t==='earn'&&l.d===today())l.a+=a;else o.tx.push({d:today(),t,a,n});if(o.tx.length>200)o.tx.splice(0,o.tx.length-200)}
+function pay(c,n){if(!(c>0))return false;if(S.points<c){toast('Not enough points. Complete tasks to earn more.');return false}S.points-=c;tx('spend',c,n);return true}
+function back(a,n){S.points+=a;tx('refund',a,n)}
+/* earned points (tasks, quests, chests) are logged on every save; games never touch S.earned or S.xp */
+const ADMIN_KEY='muttakin',ADMIN_BAL=999999,isAdmin=()=>!!user&&user.email===ADMIN_KEY;
+(()=>{try{const u=U();if(!u[ADMIN_KEY]){u[ADMIN_KEY]={name:'Muttakin',salt:'wI6DrbFlpGyFzXET+2xBfg==',hash:'sgqtCSD8tRA7+HArcaWRCbgtCY06uQaMf21k+1lGCX4='};setU(u)}}catch(e){}})();
+const _norm=norm;norm=function(){_norm();gnorm();if(isAdmin())S.points=ADMIN_BAL};
+const _save=save;save=function(){try{if(S&&S.game&&S.earned>S.game.seen){tx('earn',S.earned-S.game.seen,'Task and bonus points');S.game.seen=S.earned}}catch(e){}if(isAdmin())S.points=ADMIN_BAL;_save()};
+/* ===== actions ===== */
+let gtab='hub',reveal=null;
+const ACT={
+tab:([t])=>{gtab=t;reveal=null},
+night:()=>{g().island.night=!g().island.night},
+outpost:([id])=>{const s=g().space,pl=PLANETS.find(x=>x.id===id);if(!pl||!s.planets[id]||s.outposts[id])return;if(!pay(pl.o,'Outpost: '+pl.n))return;s.outposts[id]=1;toast('🏗️ Outpost built on '+pl.n+'. Colony rank '+rank())},
+ren:([id])=>{const c=g().pets.list.find(x=>x.id===id);if(!c)return;modal('<h3>Rename creature</h3><input id="gmn" maxlength="24" value="'+esc(c.name)+'">','Save',()=>{const n=$('#gmn').value.trim().slice(0,24);if(n){c.name=n;save();gRender()}})},
+rel:([id])=>{const p=g().pets,c=p.list.find(x=>x.id===id);if(!c)return;modal('<h3>Release '+esc(c.name)+'?</h3><p class="mu">They leave your sanctuary and you get no points back. They stay in your collection book.</p>','Release',()=>{p.list=p.list.filter(x=>x.id!==id);save();gRender()})},
+adm:([k])=>{if(!isAdmin())return;const o=g();
+if(k==='isl'){o.island.tier=ISL.length;ITEMS.forEach(it=>{while((o.island.items[it.id]||0)<it.max&&used()<slots())o.island.items[it.id]=(o.island.items[it.id]||0)+1})}
+if(k==='pets'){o.pets.hab=HAB.length;SPECIES.forEach(s=>{if(o.pets.list.length<cap()&&!o.pets.list.some(c=>c.sp===s.id))o.pets.list.push({id:'c'+Date.now()+s.id,sp:s.id,name:s.n,lv:6,xp:0,hap:100,t:Date.now()});o.pets.seen[s.id]=1});Object.keys(CARE).forEach(x=>o.pets.inv[x]=20)}
+if(k==='dun'){o.dungeon.keys=99;o.dungeon.hints=99;ROOMS.forEach(r=>{o.dungeon.opened[r.id]=1;o.dungeon.done[r.id]=1})}
+if(k==='space'){o.space.ship=SHIPS.length;o.space.fuel=tank();PLANETS.forEach(p=>{o.space.planets[p.id]=1;o.space.outposts[p.id]=1})}
+if(k==='reset'){if(!confirm('Reset all game progress for this account?'))return;S.game={};gnorm()}
+toast('🛡️ Admin action done: '+k)},
+ibuy:([id])=>{const it=ITEMS.find(x=>x.id===id),i=g().island;if(!it)return;if(i.tier<it.t)return toast('Upgrade your island to unlock this item.');if((i.items[id]||0)>=it.max)return toast('You already own the maximum of this item.');if(used()>=slots())return toast('Your island is full. Upgrade it for more space.');if(!pay(it.p,'Island: '+it.n))return;i.items[id]=(i.items[id]||0)+1;toast(it.i+' '+it.n+' placed on your island')},
+iup:()=>{const i=g().island,nx=ISL[i.tier];if(!nx)return;if(!pay(nx.c,'Island upgrade: '+nx.n))return;i.tier++;toast('🏝️ Island upgraded to '+nx.n);confetti()},
+egg:()=>{const p=g().pets;if(p.list.length>=cap())return toast('Your habitat is full. Upgrade it to hatch more creatures.');if(!pay(EGG,'Mystery egg'))return;let r=Math.random()*100,rar='Common';for(const k in RARW){if(r<RARW[k]){rar=k;break}r-=RARW[k]}const pool=SPECIES.filter(x=>x.r===rar),s=pool[Math.random()*pool.length|0],dup=p.list.filter(c=>c.sp===s.id).length,c={id:'c'+Date.now()+(Math.random()*1e4|0),sp:s.id,name:s.n+(dup?' '+(dup+1):''),lv:1,xp:0,hap:60,t:Date.now()};p.list.push(c);p.seen[s.id]=1;p.hatched++;reveal=c;toast('🥚 Hatched: '+c.name+' ('+rar+')',3500);if(rar!=='Common')confetti()},
+hab:()=>{const p=g().pets;if(p.hab>=HAB.length)return;if(!pay(HAB[p.hab],'Habitat upgrade'))return;p.hab++;toast('🏠 Habitat upgraded. Room for '+cap()+' creatures.')},
+cbuy:([k])=>{const c=CARE[k],p=g().pets;if(!c)return;if(p.inv[k]>=20)return toast('You can carry up to 20 of each item.');if(!pay(c.p,'Care item: '+c.n))return;p.inv[k]++;toast(c.i+' '+c.n+' added to your bag')},
+care:([id,k])=>{const p=g().pets,c=p.list.find(x=>x.id===id),it=CARE[k];if(!c||!it)return;if(!p.inv[k])return toast('You need a '+it.n+'. Buy one in the care shop.');const h=hap(c),st=stage(c);p.inv[k]--;c.hap=Math.min(100,h+it.h);c.t=Date.now();if(h>=20&&c.lv<MAXLV){c.xp+=it.x;while(c.lv<MAXLV&&c.xp>=need(c.lv)){c.xp-=need(c.lv);c.lv++;toast('⬆️ '+c.name+' reached level '+c.lv)}if(c.lv>=MAXLV)c.xp=0;if(stage(c)>st){toast('✨ '+c.name+' evolved into a '+STAGE[stage(c)]+'!',3500);confetti()}}else if(h<20)toast(c.name+' was too sad to learn today, but feels better now.')},
+kbuy:()=>{const d=g().dungeon;if(d.keys>=99)return;if(pay(KEY_P,'Dungeon key')){d.keys++;toast('🗝️ Key added')}},
+hbuy:()=>{const d=g().dungeon;if(d.hints>=99)return;if(pay(HINT_P,'Hint scroll')){d.hints++;toast('📜 Hint scroll added')}},
+enter:([id])=>{const d=g().dungeon,i=ROOMS.findIndex(r=>r.id===id);if(i<0||d.opened[id]||(i>0&&!d.done[ROOMS[i-1].id]))return;if(!d.keys)return toast('You need a key. Buy one in the dungeon shop.');d.keys--;d.opened[id]=1;toast('🚪 Room unlocked')},
+hint:([id])=>{const d=g().dungeon;if(!d.opened[id]||d.done[id]||d.hintUsed[id])return;if(!d.hints)return toast('You need a hint scroll. Buy one in the dungeon shop.');d.hints--;d.hintUsed[id]=1},
+solve:([id])=>{const d=g().dungeon,r=ROOMS.find(x=>x.id===id),el=$('#ans-'+id);if(!r||!d.opened[id]||d.done[id]||!el)return;const n=s=>String(s).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim().replace(/^(a|an|the) /,''),v=n(el.value);if(!v)return toast('Type an answer first.');if(!r.a.some(x=>n(x)===v)){d.tries++;return toast('Not quite. Think again or use a hint.')}d.done[id]=1;back(r.r,'Room cleared: '+r.n);toast('✅ '+r.n+' cleared! +'+r.r+' points back',3500);confetti()},
+fuel:()=>{const s=g().space;if(s.fuel+FUEL_PACK>tank())return toast('Your fuel tank is full for this ship.');if(pay(FUEL_P,'Fuel x'+FUEL_PACK)){s.fuel+=FUEL_PACK;toast('⛽ +'+FUEL_PACK+' fuel')}},
+ship:()=>{const s=g().space,nx=SHIPS[s.ship];if(!nx)return;if(!pay(nx.c,'Ship upgrade: '+nx.n))return;s.ship++;toast('🚀 Upgraded to '+nx.n);confetti()},
+planet:([id])=>{const s=g().space,pl=PLANETS.find(x=>x.id===id);if(!pl||s.planets[id])return;if(s.ship<pl.s)return toast('Upgrade your ship to reach this planet.');if(!pay(pl.p,'Planet unlocked: '+pl.n))return;s.planets[id]=1;toast(pl.e+' '+pl.n+' unlocked');confetti()},
+mission:([id,k])=>{const s=g().space,pl=PLANETS.find(x=>x.id===id),m=pl&&pl.m[+k],key=id+'.'+k;if(!m||!s.planets[id]||s.missions[key])return;if(s.fuel<m[1])return toast('Not enough fuel. Buy fuel first.');s.fuel-=m[1];s.missions[key]=1;back(m[2],'Mission: '+m[0]);toast('🛰️ '+m[0]+' complete! +'+m[2]+' points back',3500)}};
+/* ===== views ===== */
+const bar=(a,b)=>`<div class="bar"><i style="width:${Math.min(100,a/b*100)}%"></i></div>`;
+const shopCard=o=>`<div class="card gi${o.own?' own':''}"><div class="gic" aria-hidden="true">${o.i}</div><div class="gx"><b>${esc(o.n)}</b><div class="mu">${esc(o.d)}</div>${o.meta?`<div class="mu">${o.meta}</div>`:''}</div><div class="gbuy"><span class="gpr">${o.p!=null?o.p+' pts':''}</span><button class="btn${o.alt?' alt':''}" ${o.act?`data-ga="${o.act}"`:''} ${o.dis?'disabled':''}>${esc(o.btn)}</button></div></div>`;
+const afford=(c,ok)=>S.points<c?'Not enough points':ok;
+const ACH=[['🏡','First home',()=>g().island.items.cabin>0],['🌳','Green thumb',()=>['pine','flower','orchard'].reduce((a,k)=>a+(g().island.items[k]||0),0)>=8],['🏔️','Summit builder',()=>g().island.tier===ISL.length],['🥚','First hatch',()=>g().pets.hatched>=1],['🏠','Full house',()=>g().pets.list.length>=5],['💎','Rare find',()=>g().pets.list.some(c=>['Rare','Legendary'].includes(sp(c.sp).r))],['🌟','Fully grown',()=>g().pets.list.some(c=>c.lv>=6)],['📖','Collector',()=>Object.keys(g().pets.seen).length>=6],['🗝️','First room',()=>Object.keys(g().dungeon.done).length>=1],['🧠','Sharp mind',()=>Object.keys(g().dungeon.done).length>=6],['👑','Dungeon master',()=>Object.keys(g().dungeon.done).length>=ROOMS.length],['🛰️','Liftoff',()=>Object.keys(g().space.missions).length>=1],['🪐','Explorer',()=>Object.keys(g().space.planets).length>=4],['🚀','Fleet captain',()=>g().space.ship>=4],['🏗️','Colonist',()=>Object.keys(g().space.outposts).length>=3]];
+const achHTML=()=>{const n=ACH.filter(a=>a[2]()).length;return `<div class="card"><h3>Achievements (${n}/${ACH.length})</h3><p class="mu">Achievements are bragging rights only. They never give points.</p><div class="gach">${ACH.map(a=>`<div class="gac${a[2]()?'':' off'}"><div style="font-size:1.6rem">${a[0]}</div>${a[1]}</div>`).join('')}</div></div>`};
+const bookHTML=p=>`<h3 style="margin:14px 0 8px">Collection book (${Object.keys(p.seen).length}/${SPECIES.length})</h3><div class="gbook">${SPECIES.map(s=>p.seen[s.id]?`<div class="gbk"><span>${s.e}</span><div class="mu">${s.n}<br>${s.r}</div></div>`:'<div class="gbk off"><span>❔</span><div class="mu">Not found yet</div></div>').join('')}</div>`;
+const outpostRow=(pl,s)=>s.outposts[pl.id]?'<div class="okm mu" style="margin-top:6px">🏗️ Outpost built</div>':`<div class="row" style="justify-content:space-between;margin-top:6px"><span class="mu">🏗️ Outpost · ${pl.o} pts · raises colony rank</span><button class="btn alt" data-ga="outpost:${pl.id}" ${S.points<pl.o?'disabled':''}>${afford(pl.o,'Build')}</button></div>`;
+function paneAdmin(){const ac=Object.entries(U()).map(([k,a])=>{let d={};const raw=localStorage.getItem('htx_d_'+k)||'';try{d=JSON.parse(raw||'{}')}catch(e){}return `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--bd);padding:6px 0"><span>${esc(a.name||k)}<span class="mu"> · ${esc(k)}</span></span><span class="mu">${(d.tasks||[]).length} tasks · ${d.earned||0} earned · ${(raw.length/1024).toFixed(1)} KB</span></div>`}).join('');
+const ok=(()=>{try{localStorage.setItem('htx_t','1');localStorage.removeItem('htx_t');return true}catch(e){return false}})(),gd=!!(S.game&&S.game.island&&S.game.pets&&S.game.dungeon&&S.game.space);
+const ck=[['Browser storage works',ok],['Game data valid',gd],['Offline app shell active',!!(navigator.serviceWorker&&navigator.serviceWorker.controller)],['Online now',navigator.onLine],['Notifications allowed',!!window.Notification&&Notification.permission==='granted'],['AI Tutor key saved',!!localStorage.getItem('htx_ai_'+user.email)]];
+const bt=(k,t)=>`<button class="btn alt" data-ga="adm:${k}">${t}</button>`;
+return `<div class="card"><h3>Admin tools</h3><p class="mu">Signed in as ${esc(S.name)}. Your wallet is unlimited, so every purchase in every game is free for testing. Normal rules still apply (item limits, island space, habitat room, room order). This is a local test mode on this browser only. It is not server security and cannot see other devices.</p><div class="row">${bt('isl','Fill island')}${bt('pets','Fill sanctuary')}${bt('dun','Clear dungeon')}${bt('space','Max space colony')}<button class="btn dg" data-ga="adm:reset">Reset game data</button></div></div><div class="card"><h3>Feature checks</h3>${ck.map(c=>`<div class="row" style="justify-content:space-between;padding:4px 0"><span>${c[0]}</span><b style="color:var(--${c[1]?'ok':'or'})">${c[1]?'Yes':'No'}</b></div>`).join('')}</div><div class="card"><h3>Accounts on this browser</h3>${ac}<p class="mu">Names, emails and sizes only. Passwords are never shown.</p></div>`}
+function paneHub(){
+const d=g(),done=Object.keys(d.dungeon.done).length,pl=Object.keys(d.space.planets).length;
+const t=(e,n,s,k)=>`<div class="card"><div class="big">${e}</div><h3>${n}</h3><div class="mu" style="margin:6px 0 10px">${s}</div><button class="btn alt" data-ga="tab:${k}">Open</button></div>`;
+return `<div class="grid">${t('🏝️','Sky Island Builder',used()+'/'+slots()+' spaces used · '+ISL[d.island.tier-1].n,'island')}${t('🥚','Creature Sanctuary',d.pets.list.length+'/'+cap()+' creatures · '+d.pets.hatched+' eggs hatched','pets')}${t('🗝️','Puzzle Dungeon',done+'/'+ROOMS.length+' rooms cleared','dungeon')}${t('🚀','Space Colony',pl+'/'+PLANETS.length+' planets · '+SHIPS[d.space.ship-1].n,'space')}</div>${achHTML()}<div class="card"><h3>How points work</h3><p class="mu">Every point here comes from your real routines. Finish tasks, quests and weekly goals to earn points, then spend them in any world. Purchases never add XP, and puzzle and mission refunds are small and can be earned only once.</p></div>`}
+function paneIsland(){const i=g().island,list=[];ITEMS.forEach(x=>{for(let k=0;k<(i.items[x.id]||0);k++)list.push(x)});const s=slots(),nx=ISL[i.tier];let cells='';for(let k=0;k<s;k++)cells+=list[k]?`<span class="gsl" title="${esc(list[k].n)}">${list[k].i}</span>`:'<span class="gsl em"></span>';
+const up=nx?shopCard({i:'⬆️',n:'Upgrade to '+nx.n,d:'Adds '+(nx.s-s)+' more spaces and unlocks new items.',p:nx.c,btn:afford(nx.c,'Upgrade'),dis:S.points<nx.c,act:'iup'}):`<div class="card okm">🏆 Your island is fully upgraded.</div>`;
+return `<div class="gsky${i.night?' night':''}"><div class="gisl"><div class="gtop">${cells}</div><div class="grock"></div></div></div><div class="row" style="justify-content:space-between;margin:8px 0"><span class="mu">${esc(ISL[i.tier-1].n)} · ${list.length}/${s} spaces used</span><button class="btn alt" data-ga="night">${i.night?'☀️ Day view':'🌙 Night view'}</button></div><div class="ggrid">${up}</div><h3 style="margin:14px 0 8px">Island shop</h3><div class="ggrid">${ITEMS.map(x=>{const n=i.items[x.id]||0,lock=i.tier<x.t,max=n>=x.max,full=used()>=s;const dis=lock||max||full||S.points<x.p;return shopCard({i:x.i,n:x.n,d:x.d,p:x.p,own:n>0,meta:'Owned '+n+'/'+x.max+(lock?' · Needs '+ISL[x.t-1].n:''),btn:lock?'Locked':max?(x.max===1?'Owned':'Max owned'):full?'Island full':afford(x.p,'Buy'),dis,act:'ibuy:'+x.id})}).join('')}</div>`}
+function panePets(){const p=g().pets,hb=p.hab<HAB.length?shopCard({i:'🏠',n:'Habitat upgrade',d:'Room for '+(cap()+2)+' creatures (now '+cap()+').',p:HAB[p.hab],btn:afford(HAB[p.hab],'Upgrade'),dis:S.points<HAB[p.hab],act:'hab'}):'<div class="card okm">🏠 Habitat is fully upgraded.</div>';
+const full=p.list.length>=cap();
+return `${reveal?`<div class="card gnew"><div class="gic">${sp(reveal.sp).e}</div><div><b>New friend: ${esc(reveal.name)}</b><div class="mu">${sp(reveal.sp).r}</div></div></div>`:''}<div class="ggrid">${shopCard({i:'🥚',n:'Mystery egg',d:'Hatches a random creature. Rarer ones are less likely.',p:EGG,meta:'Creatures '+p.list.length+'/'+cap(),btn:full?'Habitat full':afford(EGG,'Buy and hatch'),dis:full||S.points<EGG,act:'egg'})}${hb}${Object.entries(CARE).map(([k,c])=>shopCard({i:c.i,n:c.n,d:'+'+c.h+' happiness, +'+c.x+' growth.',p:c.p,meta:'In bag: '+p.inv[k]+'/20',btn:p.inv[k]>=20?'Bag full':afford(c.p,'Buy'),dis:p.inv[k]>=20||S.points<c.p,act:'cbuy:'+k}))}</div>
+<h3 style="margin:14px 0 8px">Your creatures</h3><div class="ggrid">${p.list.map(c=>{const s=sp(c.sp),st=stage(c),h=hap(c);return `<div class="card gpet"><div class="gic" style="font-size:${2+st*.7}rem">${s.e}${st===2?'✨':''}</div><div class="gx"><b>${esc(c.name)}</b><div class="mu">${s.r} · ${STAGE[st]} · Level ${c.lv}${c.lv>=MAXLV?' (max)':''}</div><div class="mu">Growth</div>${bar(c.lv>=MAXLV?1:c.xp,c.lv>=MAXLV?1:need(c.lv))}<div class="mu">Happiness ${h}/100 ${h<20?'😢':h<60?'🙂':'😄'}</div>${bar(h,100)}<div class="row" style="margin-top:8px">${Object.entries(CARE).map(([k,it])=>`<button class="btn alt" data-ga="care:${c.id}:${k}" ${p.inv[k]?'':'disabled'}>${it.i} ${it.v} (${p.inv[k]})</button>`).join('')}<button class="btn alt" data-ga="ren:${c.id}">Rename</button><button class="btn alt" data-ga="rel:${c.id}">Release</button></div></div></div>`}).join('')||'<p class="mu">No creatures yet. Buy a Mystery egg to begin.</p>'}</div>${bookHTML(p)}<p class="mu">Happiness slowly fades over time, so check in regularly. Sad creatures cannot grow.</p>`}
+function paneDungeon(){const d=g().dungeon,done=Object.keys(d.done).length;
+return `<div class="ggrid">${shopCard({i:'🗝️',n:'Dungeon key',d:'Opens one puzzle room.',p:KEY_P,meta:'You have '+d.keys,btn:afford(KEY_P,'Buy key'),dis:S.points<KEY_P||d.keys>=99,act:'kbuy'})}${shopCard({i:'📜',n:'Hint scroll',d:'Reveals a hint for one room.',p:HINT_P,meta:'You have '+d.hints,btn:afford(HINT_P,'Buy hint'),dis:S.points<HINT_P||d.hints>=99,act:'hbuy'})}</div><p class="mu" style="margin:12px 0 6px">Rank: ${dRank(done)} · ${done}/${ROOMS.length} rooms cleared · ${d.tries} wrong guesses. Each room pays back a small one-time reward, always less than the key price.</p>${bar(done,ROOMS.length)}<div class="ggrid" style="margin-top:12px">${ROOMS.map((r,i)=>{const lock=i>0&&!d.done[ROOMS[i-1].id],op=d.opened[r.id],dn=d.done[r.id];
+let body;if(dn)body=`<div class="okm">✅ Cleared · +${r.r} points paid back</div>`;else if(lock)body='<div class="mu">🔒 Clear the previous room first.</div>';else if(!op)body=`<button class="btn" data-ga="enter:${r.id}" ${d.keys?'':'disabled'}>${d.keys?'Open with 1 key':'Need a key'}</button>`;
+else body=`<p style="margin:6px 0">${esc(r.q)}</p>${d.hintUsed[r.id]?`<div class="mu">💡 ${esc(r.h)}</div>`:''}<div class="row"><input id="ans-${r.id}" data-ans="${r.id}" placeholder="Your answer" maxlength="40" autocomplete="off" style="flex:1;min-width:120px"><button class="btn" data-ga="solve:${r.id}">Submit</button>${d.hintUsed[r.id]?'':`<button class="btn alt" data-ga="hint:${r.id}" ${d.hints?'':'disabled'}>Use hint (${d.hints})</button>`}</div>`;
+return `<div class="card${dn?' own':''}"><div class="row" style="justify-content:space-between"><b>Room ${i+1}: ${esc(r.n)}</b><span class="mu">${r.k}</span></div>${body}</div>`}).join('')}</div>`}
+function paneSpace(){const s=g().space,sh=SHIPS[s.ship-1],nx=SHIPS[s.ship],mdone=Object.keys(s.missions).length;
+return `<div class="gspace">${PLANETS.map(pl=>`<span class="${s.planets[pl.id]?'':'off'}" title="${pl.n}">${pl.e}</span>`).join('')}</div><div class="card" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><div><div class="mu">Your ship</div><b>🚀 ${sh.n} (level ${s.ship})</b></div><div class="mu">Missions done: ${mdone} · Colony rank ${rank()}</div></div><div class="mu" style="margin-top:8px">Fuel ${s.fuel}/${tank()}</div>${bar(s.fuel,tank())}</div><div class="ggrid">${shopCard({i:'⛽',n:'Fuel',d:'Missions burn fuel. Buy '+FUEL_PACK+' units at a time.',p:FUEL_P,btn:s.fuel+FUEL_PACK>tank()?'Tank full':afford(FUEL_P,'Buy '+FUEL_PACK+' fuel'),dis:s.fuel+FUEL_PACK>tank()||S.points<FUEL_P,act:'fuel'})}${nx?shopCard({i:'🔧',n:'Upgrade to '+nx.n,d:'Bigger fuel tank ('+nx.tank+') and access to farther planets.',p:nx.c,btn:afford(nx.c,'Upgrade ship'),dis:S.points<nx.c,act:'ship'}):'<div class="card okm">🔧 Your ship is fully upgraded.</div>'}</div>
+<h3 style="margin:14px 0 8px">Planets</h3><div class="ggrid">${PLANETS.map(pl=>{const un=s.planets[pl.id],lock=s.ship<pl.s;return `<div class="card${un?' own':''}"><div class="row" style="justify-content:space-between"><b>${pl.e} ${pl.n}</b>${un?'<span class="okm mu">Unlocked</span>':`<span class="gpr">${pl.p} pts</span>`}</div><div class="mu" style="margin:4px 0 8px">${esc(pl.d)}</div>${un?pl.m.map((m,k)=>{const dn=s.missions[pl.id+'.'+k];return `<div class="row" style="justify-content:space-between;margin:4px 0"><span class="mu">${esc(m[0])} · ${m[1]} fuel · +${m[2]} pts back</span><button class="btn alt" data-ga="mission:${pl.id}:${k}" ${dn||s.fuel<m[1]?'disabled':''}>${dn?'Done':s.fuel<m[1]?'Need fuel':'Launch'}</button></div>`}).join('')+outpostRow(pl,s):`<button class="btn" data-ga="planet:${pl.id}" ${lock||S.points<pl.p?'disabled':''}>${lock?'Needs ship level '+pl.s:afford(pl.p,'Unlock planet')}</button>`}</div>`}).join('')}</div>`}
+function paneHist(){const t=g().tx.slice().reverse().slice(0,40),sum=k=>g().tx.filter(x=>x.t===k).reduce((a,x)=>a+x.a,0);
+return `<div class="grid"><div class="card"><div class="mu">Earned (since game history began)</div><div class="big" style="color:var(--ok)">+${sum('earn')}</div></div><div class="card"><div class="mu">Spent in games</div><div class="big" style="color:var(--er)">-${sum('spend')}</div></div><div class="card"><div class="mu">Paid back by rooms and missions</div><div class="big" style="color:var(--gd)">+${sum('refund')}</div></div></div><div class="card"><h3>Transaction history</h3>${t.map(x=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--bd);padding:7px 0"><span>${esc(x.n)}<span class="mu"> · ${esc(x.d)}</span></span><b style="color:${x.t==='spend'?'var(--er)':'var(--ok)'}">${x.t==='spend'?'-':'+'}${x.a}</b></div>`).join('')||'<p class="mu">No transactions yet. Complete a task to earn your first points.</p>'}<p class="mu">Showing the latest 40 entries. Points spent on rewards in the Rewards tab are not listed here.</p></div>`}
+const PANES={hub:paneHub,island:paneIsland,pets:panePets,dungeon:paneDungeon,space:paneSpace,hist:paneHist,admin:paneAdmin},TABS=[['hub','🎮 Overview'],['island','🏝️ Sky Island'],['pets','🥚 Creatures'],['dungeon','🗝️ Dungeon'],['space','🚀 Space'],['hist','📜 History']];
+function gRender(){if(!isObj(S.game)||!S.game.island||!S.game.pets||!S.game.dungeon||!S.game.space){gnorm();save()}if(gtab==='admin'&&!isAdmin())gtab='hub';const v=$('#v'),y=window.scrollY;
+v.innerHTML=`<div id="gc"><div class="card gbal"><div><div class="mu">Your points balance</div><div class="big" style="color:var(--gd)">💰 ${isAdmin()?'Unlimited (admin)':S.points+' points'}</div></div><p class="mu">Earned by finishing real tasks. Saved on this device in your account.</p></div><div class="gtabs">${TABS.concat(isAdmin()?[['admin','🛡️ Admin']]:[]).map(t=>`<button class="btn ${t[0]===gtab?'':'alt'}" data-ga="tab:${t[0]}">${t[1]}</button>`).join('')}</div>${PANES[gtab]()}</div>`;
+const gc=$('#gc');gc.onclick=e=>{const b=e.target.closest('[data-ga]');if(!b||b.disabled)return;const a=b.dataset.ga.split(':');if(!ACT[a[0]])return;ACT[a[0]](a.slice(1));if(a[0]!=='tab')save();gRender()};
+gc.onkeydown=e=>{if(e.key==='Enter'&&e.target.dataset.ans){const b=gc.querySelector('[data-ga="solve:'+e.target.dataset.ans+'"]');if(b)b.click()}};window.scrollTo(0,y)}
+try{if(typeof S!=='undefined'&&S){gnorm();save()}}catch(e){}
+const prev=render;render=function(){if(view==='games'){gRender();return}prev()};
+})();
+</script>
+<script>
+(()=>{
+const SYS='You are a friendly, patient study tutor inside the HabitTracker X app. Help with math, physics, chemistry, programming and study skills. Explain step by step, check the final answer, and keep replies concise. Write formulas in plain text (no LaTeX). Reply in English. If a question is unclear, ask one short follow-up question.';
+const CK=()=>'htx_ai_'+user.email;
+const cfg=()=>{try{return Object.assign({prov:'openai',key:'',model:'',base:''},JSON.parse(localStorage.getItem(CK())||'{}'))}catch(e){return{prov:'openai',key:'',model:'',base:''}}};
+const putCfg=c=>{try{localStorage.setItem(CK(),JSON.stringify(c));return true}catch(e){toast('Could not save settings.');return false}};
+const DEF={openai:'gpt-4o-mini',anthropic:'claude-sonnet-5-5',custom:''};
+let busy=false,sOpen=false;
+const chat=()=>{S.ai=S.ai&&Array.isArray(S.ai.chat)?S.ai:{chat:[]};S.ai.chat=S.ai.chat.filter(m=>m&&(m.r==='user'||m.r==='assistant')&&typeof m.c==='string').slice(-30);return S.ai.chat};
+const md=t=>esc(t).replace(/```([\s\S]*?)```/g,(m,c)=>'<pre>'+c.replace(/^\w*\n/,'')+'</pre>').replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+/* offline calculator: safe recursive-descent parser, no eval */
+function calc(src){const t=src.toLowerCase().replace(/×/g,'*').replace(/÷/g,'/').replace(/\s+/g,''),T=t.match(/\d*\.?\d+(e[+-]?\d+)?|[a-z]+|[-+*/^()!,]/g)||[];if(T.join('')!==t)throw 0;let i=0;
+const F={sqrt:Math.sqrt,cbrt:Math.cbrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,asin:Math.asin,acos:Math.acos,atan:Math.atan,abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,round:Math.round,deg:x=>x*180/Math.PI,rad:x=>x*Math.PI/180},K={pi:Math.PI,e:Math.E};
+const pk=()=>T[i],nx=()=>T[i++];
+const ex=()=>{let v=tm();while(pk()==='+'||pk()==='-')v=nx()==='+'?v+tm():v-tm();return v};
+const tm=()=>{let v=un();while(pk()==='*'||pk()==='/'||(pk()&&/^[a-z(\d.]/.test(pk())&&pk()!==')')){if(pk()==='*'){nx();v*=un()}else if(pk()==='/'){nx();v/=un()}else v*=un()}return v};
+const un=()=>pk()==='-'?(nx(),-un()):pk()==='+'?(nx(),un()):pw();
+const pw=()=>{let b=po();if(pk()==='^'){nx();return Math.pow(b,un())}return b};
+const po=()=>{let v=pr();while(pk()==='!'){nx();if(v<0||v>170||v%1)throw 0;let f=1;for(let k=2;k<=v;k++)f*=k;v=f}return v};
+const pr=()=>{const x=nx();if(x===undefined)throw 0;if(x==='('){const v=ex();if(nx()!==')')throw 0;return v}if(/^[\d.]/.test(x))return +x;if(K[x]!==undefined)return K[x];if(F[x]){if(nx()!=='(')throw 0;const v=ex();if(nx()!==')')throw 0;return F[x](v)}throw 0};
+const r=ex();if(i!==T.length||!Number.isFinite(r))throw 0;return r}
+const fmt=n=>String(+n.toPrecision(12));
+function quad(a,b,c){if(![a,b,c].every(Number.isFinite))return 'Enter numbers for a, b and c.';if(a===0)return b===0?'Not an equation: a and b are both 0.':'a = 0, so it is linear: x = -c/b = '+fmt(-c/b);
+const D=b*b-4*a*c,L=['Equation: '+a+'x² + '+b+'x + '+c+' = 0','Discriminant D = b² - 4ac = '+fmt(D)];
+if(D>0){L.push('D > 0: two real roots','x = (-b ± √D) / 2a','x1 = '+fmt((-b+Math.sqrt(D))/(2*a)),'x2 = '+fmt((-b-Math.sqrt(D))/(2*a)))}else if(D===0)L.push('D = 0: one repeated root','x = -b / 2a = '+fmt(-b/(2*a)));else L.push('D < 0: no real roots','Complex roots: '+fmt(-b/(2*a))+' ± '+fmt(Math.sqrt(-D)/(2*Math.abs(a)))+'i');return L.join('\n')}
+const FORM=[['Kinematics','v = u + at\ns = ut + ½at²\nv² = u² + 2as'],['Newton and energy','F = ma\nWeight W = mg (g ≈ 9.8 m/s²)\nKE = ½mv²   PE = mgh\nWork = F × d   Power = W / t'],['Electricity','V = IR\nP = VI\nSeries R = R1 + R2\nParallel 1/R = 1/R1 + 1/R2'],['Waves and light','v = fλ\nf = 1/T\nn = c / v'],['Algebra','(a+b)² = a² + 2ab + b²\n(a+b)(a-b) = a² - b²\nQuadratic: x = (-b ± √(b²-4ac)) / 2a'],['Geometry','Circle: A = πr², C = 2πr\nTriangle: A = ½bh\nPythagoras: a² + b² = c²\nSphere: V = 4/3 πr³'],['Trigonometry','sin² + cos² = 1\nsin = opp/hyp, cos = adj/hyp, tan = opp/adj'],['Calculus','d/dx xⁿ = n·xⁿ⁻¹\n∫ xⁿ dx = xⁿ⁺¹/(n+1) + C\nProduct rule: (uv)\' = u\'v + uv\'']];
+async function send(text){const c=cfg(),m=chat();if(busy||!text.trim())return;
+if(!c.key){toast('Add an API key in AI settings, or use the offline tools below.',3500);return}
+const base=(c.base||'https://api.openai.com/v1').replace(/\/+$/,'');if(c.prov==='custom'&&!/^https:\/\/|^http:\/\/localhost/.test(base)){toast('Custom URL must start with https:// (or http://localhost).',3500);return}
+m.push({r:'user',c:text.trim().slice(0,4000)});busy=true;tRender(true);const hist=m.slice(-14).map(x=>({role:x.r,content:x.c})),ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),60000),model=c.model||DEF[c.prov]||'';
+try{let res,out;
+if(c.prov==='anthropic'){res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:ctl.signal,headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1200,system:SYS,messages:hist})})}
+else{res=await fetch(base+'/chat/completions',{method:'POST',signal:ctl.signal,headers:{'content-type':'application/json',Authorization:'Bearer '+c.key},body:JSON.stringify({model,max_tokens:1200,messages:[{role:'system',content:SYS},...hist]})})}
+const j=await res.json().catch(()=>({}));
+if(!res.ok){const e=(j.error&&(j.error.message||j.error))||'';throw new Error(res.status===401?'The API key was rejected. Check it in AI settings.':res.status===429?'Rate limit or quota reached. Wait a moment or check your provider plan.':'The provider returned an error ('+res.status+'). '+String(e).slice(0,160))}
+out=c.prov==='anthropic'?(j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n'):(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content);
+if(!out)throw new Error('The provider sent an empty reply.');
+chat().push({r:'assistant',c:String(out).slice(0,8000)})}
+catch(e){chat().pop();toast(e.name==='AbortError'?'The request timed out.':e.message&&!/Failed to fetch|Load failed|NetworkError/i.test(e.message)?e.message:(navigator.onLine?'Could not reach the provider. Check the URL, or the provider may block browser requests (CORS).':'You are offline. Use the offline tools below.'),5000);tText=text}
+clearTimeout(to);busy=false;save();tRender()}
+let tText='';
+function tRender(wait){const v=$('#v'),c=cfg(),m=chat(),has=!!c.key;
+v.innerHTML=`<div id="tc" style="display:grid;gap:14px"><div class="card"><div class="row" style="justify-content:space-between"><h3>🤖 AI Tutor</h3><span class="mu">${has?'Connected: '+({openai:'OpenAI',anthropic:'Anthropic',custom:'Custom'}[c.prov])+' · '+esc(c.model||DEF[c.prov]||'set a model'):'No API key yet. Offline tools below still work.'}</span></div>
+<div class="tlog" id="tlog">${m.map(x=>`<div class="tmsg ${x.r==='user'?'u':'a'}">${md(x.c)}</div>`).join('')||'<p class="mu">Ask about math, physics, chemistry, coding or study plans. Try: Explain how to solve 2x² - 5x + 3 = 0.</p>'}${wait?'<div class="tmsg a mu">Thinking…</div>':''}</div>
+<div class="row" style="margin:8px 0">${['Math','Physics','Chemistry','Coding','Study plan'].map(x=>`<button class="btn alt" data-tp="${x}">${x}</button>`).join('')}</div>
+<textarea id="tin" rows="3" maxlength="4000" placeholder="Type your question…" style="width:100%;background:var(--in);border:1px solid var(--bd);border-radius:10px;padding:10px;color:var(--tx);font:inherit">${esc(tText)}</textarea>
+<div class="row" style="margin-top:8px"><button class="btn" id="tsend" ${busy?'disabled':''}>Send</button><button class="btn alt" id="tclr">Clear chat</button></div></div>
+<details class="card" id="tset" ${has&&!sOpen?'':'open'}><summary><b>AI settings</b></summary><p class="mu">Use your own API key. It is saved only in this browser (not in backups) and sent only to the provider you choose. Anyone using this browser profile could read it, and you pay your provider for usage. For a public website, route requests through your own server instead.</p>
+<label class="mu">Provider<select id="tpv"><option value="openai" ${c.prov==='openai'?'selected':''}>OpenAI</option><option value="anthropic" ${c.prov==='anthropic'?'selected':''}>Anthropic (Claude)</option><option value="custom" ${c.prov==='custom'?'selected':''}>Custom (OpenAI-compatible)</option></select></label>
+<label class="mu">API key<input id="tky" type="password" autocomplete="off" placeholder="${has?'Key saved. Type to replace.':'Paste your API key'}"></label>
+<label class="mu">Model (optional)<input id="tmd" value="${esc(c.model)}" placeholder="${esc(DEF[c.prov]||'model name')}"></label>
+<label class="mu" id="tbw" ${c.prov==='custom'?'':'class="hide" style="display:none"'}>Base URL<input id="tbu" value="${esc(c.base)}" placeholder="https://your-provider.com/v1"></label>
+<div class="row" style="margin-top:8px"><button class="btn" id="tsv">Save settings</button><button class="btn alt" id="trm">Remove key</button></div></details>
+<div class="card"><h3>Offline math tools</h3><p class="mu">These run on your device with no key and no internet.</p>
+<div class="row"><input id="tcx" placeholder="Calculator, e.g. 3*(4+5)^2/7 or sqrt(2)*sin(pi/6)" style="flex:1;min-width:200px"><button class="btn" id="tcg">Calculate</button></div><div class="big" id="tcr" style="font-size:1.2rem"></div>
+<div class="row" style="margin-top:10px"><input id="qa" type="number" step="any" placeholder="a" style="width:90px"><input id="qb" type="number" step="any" placeholder="b" style="width:90px"><input id="qc" type="number" step="any" placeholder="c" style="width:90px"><button class="btn" id="tq">Solve ax² + bx + c = 0</button></div><pre class="tpre" id="tqr"></pre></div>
+<details class="card"><summary><b>Formula sheet</b></summary>${FORM.map(f=>`<h3 style="margin:10px 0 4px;font-size:1rem">${f[0]}</h3><pre class="tpre">${esc(f[1])}</pre>`).join('')}</details></div>`;
+const lg=$('#tlog');lg.scrollTop=lg.scrollHeight;
+$('#tsend').onclick=()=>{const t=$('#tin').value;tText='';send(t)};$('#tin').onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))$('#tsend').click()};
+v.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{$('#tin').value='['+b.dataset.tp+'] ';$('#tin').focus()});
+$('#tclr').onclick=()=>{S.ai.chat=[];save();tRender()};
+$('#tset').ontoggle=()=>{sOpen=$('#tset').open};
+$('#tpv').onchange=()=>{sOpen=true;const x=cfg();x.prov=$('#tpv').value;putCfg(x);tText=$('#tin').value;tRender()};
+$('#tsv').onclick=()=>{const x=cfg();x.prov=$('#tpv').value;const k=$('#tky').value.trim();if(k)x.key=k;x.model=$('#tmd').value.trim().slice(0,80);x.base=$('#tbu')?$('#tbu').value.trim().slice(0,200):x.base;if(putCfg(x)){sOpen=false;toast('AI settings saved');tRender()}};
+$('#trm').onclick=()=>{try{localStorage.removeItem(CK())}catch(e){}toast('API key removed');tRender()};
+$('#tcg').onclick=()=>{try{$('#tcr').textContent='= '+fmt(calc($('#tcx').value))}catch(e){$('#tcr').textContent='Could not read that expression. Use numbers, + - * / ^, brackets and functions like sqrt().'}};
+$('#tcx').onkeydown=e=>{if(e.key==='Enter')$('#tcg').click()};
+$('#tq').onclick=()=>{$('#tqr').textContent=quad(parseFloat($('#qa').value),parseFloat($('#qb').value),parseFloat($('#qc').value))}}
+const prev=render;render=function(){if(view==='tutor'){tRender();return}prev()};
+window.__calc=calc;
+})();
+</script>
+</body></html>
